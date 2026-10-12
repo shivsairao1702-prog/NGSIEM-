@@ -24,7 +24,7 @@ A hands-on, documented build of CrowdStrike Falcon Next-Gen SIEM (NG-SIEM), from
 
 Passing CI validates repository checks and synthetic fixtures. Tenant deployment, console permissions, parser execution and licensed retention require separate evidence.
 
-Module 03 includes a Cribl Datagen runbook and parser reference model. Next, validate parser 1.1.0 in the tenant, then onboard Linux audit logs and demonstrate a detection with sanitized evidence.
+Module 03 includes a Cribl Datagen runbook and parser reference model. The project owner confirms the current committed parser was tested in a working environment (2026-10-12). Next, record sanitized validation evidence, onboard Linux audit logs and demonstrate a detection.
 
 ## Backlog
 
