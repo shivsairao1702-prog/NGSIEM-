@@ -1,0 +1,20 @@
+# Secrets and credentials - never commit
+.env
+*.pem
+*.key
+*.p12
+*secret*
+*token*
+*credentials*
+
+# Tenant-specific data - never commit
+*.har
+tenant-*.json
+cid-*.txt
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+~$*.xlsx

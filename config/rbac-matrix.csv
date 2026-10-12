@@ -1,0 +1,17 @@
+capability,analyst_read_only,analyst_l1,analyst_l2_ir,detection_engineer,platform_engineer,falcon_admin,api_client_fusion
+search_events_in_assigned_views,Y,Y,Y,Y,Y,Y,N
+view_detections_and_cases,Y,Y,Y,Y,Y,Y,N
+triage_and_update_detection_status,N,Y,Y,Y,N,Y,N
+create_saved_searches_and_dashboards,N,Y,Y,Y,Y,Y,N
+create_edit_own_correlation_rules,N,Y,Y,Y,N,Y,N
+edit_shared_correlation_rules,N,N,N,Y,N,Y,N
+manage_lookup_files,N,N,N,Y,Y,Y,N
+manage_parsers,N,N,N,N,Y,Y,N
+manage_data_connectors_and_hec_tokens,N,N,N,N,Y,Y,N
+manage_log_collector_fleet,N,N,N,N,Y,Y,N
+manage_repositories_and_retention,N,N,N,N,Y,Y,N
+manage_fusion_workflows,N,N,N,Y,Y,Y,N
+run_fusion_workflow_actions,N,N,N,N,N,N,Y
+contain_host_rtr,N,N,Y,N,N,Y,Y
+manage_users_and_roles,N,N,N,N,N,Y,N
+manage_api_clients,N,N,N,N,N,Y,N
