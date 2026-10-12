@@ -1,6 +1,6 @@
 # 03 - Parser walkthrough: cribl-datagen-syslog
 
-File: `config/parsers/cribl-datagen-syslog.cql`, version 1.1.1. Version 1.0.0 is the one validated in the lab tenant; 1.1.1 is not yet run in a tenant (see "What is not proven").
+File: `config/parsers/cribl-datagen-syslog.cql`. On 2026-10-12 the project owner confirmed that the exact CQL committed on main was tested successfully in a working environment. This is owner-reported validation; sanitized test evidence and coverage should be recorded separately. Parser.version is a release label, not proof of validation.
 
 ## Flow
 
@@ -49,7 +49,7 @@ flowchart TD
 
 | Limitation | Case that pins it | Consequence |
 |---|---|---|
-| No year in RFC3164 | `test_year_rollover_hazard_is_real` | The Python model assumes the ingest year and can place December records in the future. LogScale documents previous-year inference for dates more than eight days ahead; the model does not reproduce this. Do not treat this fixture as platform evidence |
+| No year in RFC3164 | `test_year_rollover_hazard_is_real` | The Python model assumes the ingest year and can place December records in the future. LogScale documents previous-year inference for dates more than eight days ahead. This model fixture does not establish platform behavior |
 | Zone assumed UTC | none | Wrong by the sender's offset if it logs local time. Confirm the sender |
 | Tags with a colon, such as `pam_unix(sshd:auth)`, split wrongly | `known-limitation-pam-tag` | `process.name` becomes `pam_unix(sshd`. The Linux auth parser must handle this form |
 | RFC5424 not supported | `rfc5424-not-supported` | Flagged, falls back to ingest time |
@@ -65,22 +65,16 @@ Try it:
 python3 scripts/parser_ref.py '<13>Sep  9 03:04:05 db02 cron[77]: job ran'
 ```
 
-## What is not proven
+## Validation coverage
 
-The model checks this file's regex and logic. It does not run LogScale. These depend on the platform and are listed in the parser's `.meta.json` under `verify_in_tenant`:
+The owner confirms the current CQL works in the environment. The Python model does not execute LogScale. Record whether the environment test covered each item below; successful execution does not by itself establish edge-case coverage or full CPS compliance:
 
 - `parseTimestamp` with `format="seconds"` on a fractional epoch
 - The year assumed for a time with no year
-- The documented `math:floor(field=..., as=...)` pipeline form is now used; verify field types and execution in the tenant
+- The priority block and field typing, including priority boundary cases
 - The `Vendor` and `observer.type` values against the current vendor and allowed lists
 - That the tag fields selected in the parser settings match `tag_fields`
 
-Run version 1.1.1 through the validation query before treating it as validated.
+Keep the confirmed working CQL unchanged. Record test inputs, outputs, environment date and scope. Compare `Cps.version` with the published standard separately; the declared standard does not control whether the parser executes.
 
-## Review references
-
-- [math:floor syntax](https://library.humio.com/crowdstrike-query-language/functions-math-floor.html)
-- [Timestamp year inference](https://library.humio.com/crowdstrike-query-language/functions-parsetimestamp.html)
-- [Published CPS versions](https://developer.crowdstrike.com/ngsiem/cps/versions/)
-
-The CPS marker now declares the published legacy 1.0.0 baseline rather than an unpublished 2.0.0 version. This is not certification: audit ECS 8.x mappings or explicitly migrate to the current standard before production use.
+Reference: [timestamp year inference](https://library.humio.com/crowdstrike-query-language/functions-parsetimestamp.html).

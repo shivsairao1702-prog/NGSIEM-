@@ -1,6 +1,6 @@
 /*
 Cribl Datagen Syslog - TEST parser (mock ingest pipeline validation)
-Parser.version 1.1.1 (1.0.0 was the version validated in the lab tenant)
+Parser.version 1.1.0 (1.0.0 was the version validated in the lab tenant)
 
 Minimal parser: proves data flows and fields extract. Not production-hardened.
 Source: Cribl Datagen `syslog.log` -> Cribl Stream -> Falcon Cribl data connector
@@ -20,9 +20,9 @@ Changes from 1.0.0
 // STATIC METADATA
 // ============================================================================
 | Vendor := "Cribl"            // VERIFY against https://developer.crowdstrike.com/docs/ng-siem/vendors
-| Parser.version := "1.1.1"
+| Parser.version := "1.1.0"
 | ecs.version := "8.17.0"
-| Cps.version := "1.0.0" // Legacy baseline; full compliance remains unverified
+| Cps.version := "2.0.0"
 | event.module := "syslog"
 | event.dataset := "syslog.generic"
 | observer.type := "forwarder"  // VERIFY against the allowed #observer.type list
@@ -102,8 +102,7 @@ Changes from 1.0.0
 | case {
     Vendor.priority = /^\d+$/
         | parseInt(field="Vendor.priority", as="_temp_pri", radix=10)
-        | _temp_ratio := _temp_pri / 8
-        | math:floor(field="_temp_ratio", as="_temp_fac")
+        | _temp_fac := floor(_temp_pri / 8)
         | log.syslog.priority := _temp_pri
         | log.syslog.facility.code := _temp_fac
         | log.syslog.severity.code := _temp_pri - (_temp_fac * 8)
@@ -114,7 +113,7 @@ Changes from 1.0.0
 // ============================================================================
 // CLEANUP
 // ============================================================================
-| drop([_temp_line, _temp_pri, _temp_ratio, _temp_fac, Vendor.envelope.event, Vendor.envelope._raw])
+| drop([_temp_line, _temp_pri, _temp_fac, Vendor.envelope.event, Vendor.envelope._raw])
 
 /*
 VALIDATE (SOP Step 4) - Advanced Event Search, Past 15 Minutes:
