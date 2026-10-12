@@ -54,7 +54,7 @@ Show how to design an NG-SIEM deployment before onboarding any data: where logs 
 The workbook is the source of truth for every number in the docs. `tests/test_consistency.py` fails if a document drifts from it, if a repository is given two retention periods, if the RBAC matrix breaks a separation-of-duties rule, or if a secret-like value, broken link or unknown repository name appears.
 
 ```bash
-pip install -r requirements-dev.txt
+pip install -r ../requirements-dev.txt
 pytest -q
 ```
 
@@ -79,4 +79,4 @@ See the module index in the [root README](../README.md). Modules 02 onward reuse
 
 ## Security notes
 
-No tokens, customer IDs, tenant names, real IPs or hostnames are included. The `.gitignore` blocks common secret and tenant files. Keep it that way when adapting this project to a real environment.
+No tokens, customer IDs, tenant names, real IPs or hostnames are included. The `.gitignore` excludes common local secret and tenant files; it does not protect already tracked files. Keep it that way when adapting this project to a real environment.
