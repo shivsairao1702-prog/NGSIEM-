@@ -33,7 +33,7 @@ NN-module-name/
 
 ## Validation
 
-Each module with a `tests/` folder is tested automatically on every push by `.github/workflows/validate.yml`, together with Markdown lint, an offline link check and a render check of every Mermaid diagram. To run one module locally:
+Each module with a `tests/` folder is tested automatically on every push by `.github/workflows/validate.yml`, together with a Gitleaks secret scan, Markdown lint, an offline link check and a render check of every Mermaid diagram (each block is extracted to its own file first, so a failure names the diagram). To run one module locally:
 
 ```bash
 pip install -r requirements-dev.txt
@@ -44,4 +44,5 @@ cd 01-architecture && pytest -q
 
 - All data is synthetic. No tokens, customer IDs, tenant names, real IPs or hostnames, enforced by tests and `.gitignore`.
 - Numbers in documents come from a workbook or config file and are checked against it by tests.
+- Planning values (compression ratio, filter reduction, growth) are labelled ESTIMATE until replaced by measured telemetry. Permissions are labelled design intent until verified against the console.
 - Anything that depends on licence, vendor limits or console behaviour is marked **VERIFY** until checked against current CrowdStrike documentation.

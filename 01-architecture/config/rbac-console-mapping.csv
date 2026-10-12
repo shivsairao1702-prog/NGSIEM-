@@ -1,0 +1,17 @@
+capability,intended_roles,console_role_or_permission,console_location,verified,verified_on,verified_by,risk_if_wrong
+search_events_in_assigned_views,analyst_read_only;analyst_l1;analyst_l2_ir;detection_engineer;platform_engineer;falcon_admin,,,no,,,HIGH - confirm how repository/view scoping is assigned to roles in the NG-SIEM console.
+view_detections_and_cases,analyst_read_only;analyst_l1;analyst_l2_ir;detection_engineer;platform_engineer;falcon_admin,,,no,,,LOW
+triage_and_update_detection_status,analyst_l1;analyst_l2_ir;detection_engineer;falcon_admin,,,no,,,LOW
+create_saved_searches_and_dashboards,analyst_l1;analyst_l2_ir;detection_engineer;platform_engineer;falcon_admin,,,no,,,LOW
+create_edit_own_correlation_rules,analyst_l1;analyst_l2_ir;detection_engineer;falcon_admin,,,no,,,LOW
+edit_shared_correlation_rules,detection_engineer;falcon_admin,,,no,,,HIGH - the design relies on analysts being unable to edit rules they did not create. Notes say the Analyst role can build its own rules; whether others' rules are protected is unconfirmed.
+manage_lookup_files,detection_engineer;platform_engineer;falcon_admin,,,no,,,MEDIUM - confirm whether lookup management is separable from rule management.
+manage_parsers,platform_engineer;falcon_admin,,,no,,,LOW
+manage_data_connectors_and_hec_tokens,platform_engineer;falcon_admin,,,no,,,LOW
+manage_log_collector_fleet,platform_engineer;falcon_admin,,,no,,,MEDIUM - confirm whether fleet management is part of NG SIEM Administrator or a separate Falcon permission.
+manage_repositories_and_retention,platform_engineer;falcon_admin,,,no,,,MEDIUM - confirm who can change retention and whether changes are audit-logged.
+manage_fusion_workflows,detection_engineer;platform_engineer;falcon_admin,,,no,,,"MEDIUM - confirm which role may create and edit Fusion workflows, and whether execution needs a separate permission."
+run_fusion_workflow_actions,api_client_fusion,,,no,,,HIGH - confirm the exact API client scopes needed; grant nothing broader.
+contain_host_rtr,analyst_l2_ir;falcon_admin;api_client_fusion,,,no,,,"HIGH - confirm the exact Falcon response role and API scope for network containment, and that read-only/L1 roles cannot reach it."
+manage_users_and_roles,falcon_admin,,,no,,,LOW
+manage_api_clients,falcon_admin,,,no,,,LOW

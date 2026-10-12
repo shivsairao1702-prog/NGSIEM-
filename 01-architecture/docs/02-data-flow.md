@@ -42,7 +42,7 @@ A static copy of this diagram is in `diagrams/data-flow.svg`.
 | Store | Events are written to repositories, each with its own retention. Views span repositories. | 6 third-party repositories (see `04-retention-and-repositories.md`) |
 | Analyse | CQL in Advanced event search, dashboards, lookup files. | Single search surface via `view-soc-all` |
 | Detect | First-party detections come from Falcon; correlation rules run CQL on a schedule against any data. | Correlation rules over third-party repositories |
-| Respond | Incident Workbench for investigation, Fusion SOAR workflows, RTR/host containment, API clients with scopes. | Fusion workflow contains a host after a high-confidence identity or network alert |
+| Respond | Incident Workbench for investigation, Fusion SOAR workflows, RTR/host containment, API clients with scopes. | Fusion workflow proposes host containment only after endpoint correlation and a confidence threshold, then waits for approval (ADR-009) |
 
 ## Per-source ingest path
 

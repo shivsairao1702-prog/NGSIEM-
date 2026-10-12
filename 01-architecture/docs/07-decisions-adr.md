@@ -43,7 +43,7 @@ Each record states the context, the decision, the alternatives and the trade-off
 
 **Context:** FortiGate traffic is the largest single source at about 4.75 GB/day raw, and much of it is allowed internal-to-internal noise.
 
-**Decision:** Filter it before ingest with CrowdStream, with a planned 50% reduction.
+**Decision:** Filter it before ingest with CrowdStream, with an estimated 50% reduction that must be measured before it is relied on (see the validation plan in `03-sizing.md`).
 
 **Alternatives considered:** Ingest everything (simple but pushes the design over the free tier), or drop the source (loses network visibility).
 
@@ -111,6 +111,29 @@ Each record states the context, the decision, the alternatives and the trade-off
 
 **Context:** Alerts on third-party data (for example an identity alert) should be able to contain a host through the Falcon sensor without extra integration.
 
-**Decision:** Use Fusion SOAR workflows for containment and notification. Automation runs through dedicated API clients with minimal scopes. Third-party SOAR actions and correlation rule templates may require a paid NG-SIEM licence, so confirm entitlement.
+**Decision:** Use Fusion SOAR workflows for enrichment, notification and containment, with containment always subject to the guardrails in ADR-009. Automation runs through dedicated API clients with minimal scopes. Third-party SOAR actions and correlation rule templates may require a paid NG-SIEM licence, so confirm entitlement.
 
 **Trade-offs:** Workflows must be tested and version controlled (see module 09 and the CI workflow in `.github/workflows/validate.yml`).
+
+---
+
+## ADR-009: Containment guardrails
+
+**Status:** Accepted (design; implemented and tested in module 09)
+
+**Context:** Identity and network alerts name a user or an IP address, not a managed host. Isolating the wrong machine, a domain controller or an executive's laptop on a weak signal causes an outage, and an attacker who can trigger an alert can try to trigger a containment. Containment must be deliberate.
+
+**Decision:** The machine-readable policy is `config/containment-policy.json`. Containment through a Fusion workflow requires all of:
+
+1. **Endpoint identity correlation.** The alert entity is resolved to exactly one Falcon-managed host using evidence (an interactive logon by the user within the time window, the IP assignment at event time, or an exact hostname), with at most 300 seconds of time skew. No match or more than one match means no containment and an escalation.
+2. **Confidence threshold.** Severity of high or above, and at least two independent signals from different data sources, for example an identity alert plus an endpoint detection on the same host.
+3. **Approval.** An L2 responder approves within 15 minutes. If nobody responds, the workflow escalates to the on-call engineer and does not contain.
+4. **Exclusions.** Never contain assets tagged domain-controller, tier0-server, critical-server or security-tooling, nor entries in the exclusion lookup. VIP users always require approval.
+5. **Blast-radius limit.** No more than three containments per hour, after which automation stops and pages the on-call engineer.
+6. **Audit and rollback.** Every decision, including a decision not to act, is logged with the evidence. Containment is lifted manually by an L2 responder and reviewed within 24 hours.
+
+Automatic containment without approval is disabled. If it is ever enabled it is limited to critical severity, at least three independent signals, non-VIP workstations that are not excluded.
+
+**Alternatives considered:** Fully automatic containment on any high alert (fastest, but a false positive or a spoofed alert isolates the wrong host), and manual containment only (safest, but slow for ransomware-class events).
+
+**Trade-offs:** Approval adds minutes to response. The 15-minute timeout and the exclusion list should be reviewed after the first tabletop exercise. **VERIFY** the Falcon response role and API scope used for containment (see `08-rbac-verification.md`, assumption A3).

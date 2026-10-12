@@ -1,0 +1,60 @@
+{
+  "policy_version": "1.0.0",
+  "status": "design - to be implemented in module 09 (Fusion SOAR workflows)",
+  "applies_to": {
+    "alert_sources": ["identity", "network", "correlation_rule"],
+    "action": "network_containment_via_falcon_sensor"
+  },
+  "entity_resolution": {
+    "required": true,
+    "description": "An identity or network alert names a user or an IP, not a host. Containment may only target a host that has been resolved to a Falcon-managed endpoint with evidence.",
+    "methods_in_order": [
+      "falcon_host_with_interactive_logon_by_user_within_window",
+      "falcon_host_by_ip_assignment_at_event_time",
+      "falcon_host_by_exact_hostname"
+    ],
+    "max_time_skew_seconds": 300,
+    "require_single_match": true,
+    "on_no_match_or_ambiguous": "do_not_contain_and_escalate"
+  },
+  "confidence": {
+    "min_severity": "high",
+    "min_independent_signals": 2,
+    "signal_independence": "signals must come from different data sources, for example an identity alert and an endpoint detection on the same host"
+  },
+  "approval": {
+    "required_by_default": true,
+    "approver_role": "analyst_l2_ir",
+    "timeout_minutes": 15,
+    "on_timeout": "escalate_to_on_call_do_not_contain"
+  },
+  "auto_containment": {
+    "enabled": false,
+    "allowed_only_when": {
+      "min_severity": "critical",
+      "min_independent_signals": 3,
+      "asset_class": "workstation",
+      "not_vip_user": true,
+      "not_excluded": true
+    }
+  },
+  "exclusions": {
+    "never_contain_asset_tags": ["domain-controller", "tier0-server", "critical-server", "security-tooling"],
+    "lookup_files": ["lk_containment_exclusions.csv"],
+    "always_require_approval_lookup": "lk_vip_users.csv"
+  },
+  "blast_radius": {
+    "max_containments_per_hour": 3,
+    "on_limit_exceeded": "stop_automation_and_page_on_call"
+  },
+  "audit": {
+    "log_every_decision": true,
+    "include_non_actions": true,
+    "record": ["workflow_run_id", "triggering_alert_id", "resolved_host_id", "resolution_method", "signals", "approver", "decision", "timestamp"]
+  },
+  "rollback": {
+    "lift_containment_role": "analyst_l2_ir",
+    "review_within_hours": 24,
+    "auto_lift": false
+  }
+}

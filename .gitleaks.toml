@@ -1,0 +1,6 @@
+# Gitleaks configuration. Extends the default ruleset.
+# Do not allowlist files to silence a finding: remove the secret from the file and from history.
+title = "ngsiem lab gitleaks config"
+
+[extend]
+useDefault = true

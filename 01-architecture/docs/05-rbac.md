@@ -2,6 +2,8 @@
 
 The full permission matrix is in `../config/rbac-matrix.csv`. This document explains the design reasoning. Day-to-day user administration (provisioning, SSO, API clients, access reviews) is module 02 (user management).
 
+> **Status: design intent, not verified.** The matrix and persona mapping below describe what Northwind Labs wants each role to be able to do. They have not been checked against real CrowdStrike role capabilities. The verification procedure, the riskiest assumptions and their fallbacks are in `08-rbac-verification.md`.
+
 ## Principles
 
 1. **Least privilege**: start with the lowest built-in role that lets a person do their job.

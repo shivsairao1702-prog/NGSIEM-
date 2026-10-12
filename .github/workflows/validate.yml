@@ -35,6 +35,20 @@ jobs:
           done
           exit $status
 
+  secrets:
+    name: Secret scan (Gitleaks)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   markdown:
     name: Markdown lint
     runs-on: ubuntu-latest
@@ -65,14 +79,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Render every Mermaid block (fails on syntax errors)
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Extract each Mermaid block into its own .mmd file
+        run: python3 scripts/extract_mermaid.py /tmp/mmd
+      - name: Render every block (fails on the first syntax error, naming the file and line)
         run: |
           npm install --no-save @mermaid-js/mermaid-cli
           echo '{"args":["--no-sandbox"]}' > /tmp/puppeteer.json
-          mkdir -p /tmp/mermaid
-          for f in $(git ls-files '*.md'); do
-            if grep -q '```mermaid' "$f"; then
-              out="/tmp/mermaid/$(echo "$f" | tr '/' '_')"
-              npx mmdc -p /tmp/puppeteer.json -i "$f" -o "$out"
+          status=0
+          for f in /tmp/mmd/*.mmd; do
+            if ! npx mmdc -p /tmp/puppeteer.json -i "$f" -o "${f%.mmd}.svg"; then
+              echo "::error::Mermaid syntax error in $(basename "$f")"
+              status=1
             fi
           done
+          exit $status
