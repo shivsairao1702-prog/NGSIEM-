@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" font-family="Arial, Helvetica, sans-serif" font-size="13">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1F3864"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="560" fill="#FFFFFF"/>
+  <text x="500" y="28" text-anchor="middle" font-size="18" font-weight="bold" fill="#1F3864">CrowdStrike NG-SIEM data flow - Northwind Labs</text>
+  <rect x="10" y="44" width="980" height="506" rx="10" fill="none" stroke="#1F3864" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="24" y="64" font-size="12" fill="#1F3864" font-weight="bold">FALCON PLATFORM - one console, one agent, RBAC</text>
+
+  <!-- column labels -->
+  <text x="100" y="92" text-anchor="middle" font-weight="bold" fill="#444">SOURCES</text>
+  <text x="385" y="92" text-anchor="middle" font-weight="bold" fill="#444">INGEST</text>
+  <text x="620" y="92" text-anchor="middle" font-weight="bold" fill="#444">PARSE</text>
+  <text x="850" y="92" text-anchor="middle" font-weight="bold" fill="#444">STORE</text>
+
+  <!-- sources -->
+  <rect x="30" y="104" width="140" height="70" rx="6" fill="#E8F0FE" stroke="#1F3864"/>
+  <text x="100" y="128" text-anchor="middle" font-weight="bold">First-party</text>
+  <text x="100" y="146" text-anchor="middle">Falcon sensor</text>
+  <text x="100" y="162" text-anchor="middle">Identity, Cloud</text>
+  <rect x="30" y="210" width="140" height="110" rx="6" fill="#FFF4E0" stroke="#B26A00"/>
+  <text x="100" y="234" text-anchor="middle" font-weight="bold">Third-party</text>
+  <text x="100" y="254" text-anchor="middle">Okta, Entra ID, M365</text>
+  <text x="100" y="272" text-anchor="middle">AWS CloudTrail</text>
+  <text x="100" y="290" text-anchor="middle">FortiGate, Zscaler</text>
+  <text x="100" y="308" text-anchor="middle">Windows, Linux</text>
+
+  <!-- first-party shortcut -->
+  <line x1="170" y1="139" x2="765" y2="139" stroke="#1F3864" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="470" y="132" text-anchor="middle" font-size="12" fill="#1F3864">no connector, no parser</text>
+
+  <!-- ingest -->
+  <rect x="250" y="200" width="270" height="170" rx="6" fill="#FFFFFF" stroke="#1F3864"/>
+  <text x="385" y="222" text-anchor="middle" font-weight="bold">Ingest methods</text>
+  <text x="265" y="248">Data connectors (API pull)</text>
+  <text x="275" y="264" font-size="11" fill="#555">Okta, Entra, M365, CloudTrail</text>
+  <text x="265" y="286">HEC (HTTP push)</text>
+  <text x="275" y="302" font-size="11" fill="#555">Zscaler</text>
+  <text x="265" y="324">Falcon Log Collector + Fleet mgmt</text>
+  <text x="275" y="340" font-size="11" fill="#555">FortiGate UTM, Windows, Linux</text>
+  <text x="265" y="358">CrowdStream (pre-ingest filter)</text>
+  <line x1="170" y1="265" x2="248" y2="285" stroke="#1F3864" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- parse -->
+  <rect x="560" y="220" width="120" height="130" rx="6" fill="#FFFFFF" stroke="#1F3864"/>
+  <text x="620" y="244" text-anchor="middle" font-weight="bold">Parsers</text>
+  <text x="620" y="264" text-anchor="middle" font-size="12">at ingest</text>
+  <text x="620" y="284" text-anchor="middle" font-size="12">CPS (ECS-based)</text>
+  <text x="620" y="304" text-anchor="middle" font-size="12">out-of-the-box</text>
+  <text x="620" y="320" text-anchor="middle" font-size="12">or custom</text>
+  <line x1="520" y1="285" x2="558" y2="285" stroke="#1F3864" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- store -->
+  <rect x="765" y="104" width="215" height="280" rx="6" fill="#E8F0FE" stroke="#1F3864"/>
+  <text x="872" y="126" text-anchor="middle" font-weight="bold">Falcon LogScale (index-free)</text>
+  <text x="872" y="148" text-anchor="middle" font-size="12" fill="#1F3864">Repositories (retention)</text>
+  <text x="780" y="170" font-size="12">repo-identity        365 d</text>
+  <text x="780" y="188" font-size="12">repo-saas            365 d</text>
+  <text x="780" y="206" font-size="12">repo-cloud           365 d</text>
+  <text x="780" y="224" font-size="12">repo-net-traffic      90 d</text>
+  <text x="780" y="242" font-size="12">repo-net-security    180 d</text>
+  <text x="780" y="260" font-size="12">repo-os              180 d</text>
+  <text x="872" y="288" text-anchor="middle" font-size="12" fill="#1F3864">Views</text>
+  <text x="780" y="308" font-size="12">view-soc-all</text>
+  <text x="780" y="326" font-size="12">view-identity, view-network</text>
+  <text x="780" y="344" font-size="12">view-audit (read only)</text>
+  <text x="872" y="372" text-anchor="middle" font-size="11" fill="#555">+ Falcon first-party data (separate)</text>
+  <line x1="680" y1="285" x2="763" y2="285" stroke="#1F3864" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- analyse / detect / respond -->
+  <rect x="765" y="410" width="215" height="110" rx="6" fill="#FFFFFF" stroke="#1F3864"/>
+  <text x="872" y="432" text-anchor="middle" font-weight="bold">ANALYSE + DETECT</text>
+  <text x="872" y="454" text-anchor="middle" font-size="12">CQL, Advanced event search</text>
+  <text x="872" y="472" text-anchor="middle" font-size="12">dashboards, lookup files</text>
+  <text x="872" y="490" text-anchor="middle" font-size="12">first-party detections</text>
+  <text x="872" y="508" text-anchor="middle" font-size="12">+ correlation rules</text>
+  <line x1="872" y1="384" x2="872" y2="408" stroke="#1F3864" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <rect x="400" y="410" width="290" height="110" rx="6" fill="#E9F7EF" stroke="#1E7B45"/>
+  <text x="545" y="432" text-anchor="middle" font-weight="bold">RESPOND</text>
+  <text x="545" y="454" text-anchor="middle" font-size="12">Incident Workbench (investigate)</text>
+  <text x="545" y="472" text-anchor="middle" font-size="12">Fusion SOAR workflows</text>
+  <text x="545" y="490" text-anchor="middle" font-size="12">RTR / host containment</text>
+  <text x="545" y="508" text-anchor="middle" font-size="12">API clients with scopes</text>
+  <line x1="765" y1="465" x2="692" y2="465" stroke="#1F3864" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- feedback: containment reaches endpoints -->
+  <path d="M 400 465 L 20 465 L 20 139 L 28 139" fill="none" stroke="#1E7B45" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+  <text x="210" y="456" text-anchor="middle" font-size="12" fill="#1E7B45">contain host via Falcon sensor</text>
+</svg>

@@ -1,0 +1,68 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  consistency:
+    name: Docs, workbook and RBAC consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: pip install -r requirements-dev.txt
+      - run: pytest -q
+
+  markdown:
+    name: Markdown lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DavidAnson/markdownlint-cli2-action@v16
+        with:
+          globs: |
+            README.md
+            docs/**/*.md
+
+  links:
+    name: Link check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lycheeverse/lychee-action@v2
+        with:
+          args: --offline --no-progress "README.md" "docs/**/*.md"
+          fail: true
+
+  diagrams:
+    name: Mermaid syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Render every Mermaid block (fails on syntax errors)
+        run: |
+          npm install --no-save @mermaid-js/mermaid-cli
+          mkdir -p /tmp/mermaid
+          export PUPPETEER_CONFIG=/tmp/puppeteer.json
+          echo '{"args":["--no-sandbox"]}' > "$PUPPETEER_CONFIG"
+          for f in README.md docs/*.md; do
+            if grep -q '```mermaid' "$f"; then
+              npx mmdc -p "$PUPPETEER_CONFIG" -i "$f" -o "/tmp/mermaid/$(basename "$f" .md).md"
+            fi
+          done
