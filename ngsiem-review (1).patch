@@ -1,0 +1,92 @@
+diff --git a/01-architecture/README.md b/01-architecture/README.md
+index 4f0556f..06220dc 100644
+--- a/01-architecture/README.md
++++ b/01-architecture/README.md
+@@ -54,7 +54,7 @@ Show how to design an NG-SIEM deployment before onboarding any data: where logs
+ The workbook is the source of truth for every number in the docs. `tests/test_consistency.py` fails if a document drifts from it, if a repository is given two retention periods, if the RBAC matrix breaks a separation-of-duties rule, or if a secret-like value, broken link or unknown repository name appears.
+ 
+ ```bash
+-pip install -r requirements-dev.txt
++pip install -r ../requirements-dev.txt
+ pytest -q
+ ```
+ 
+@@ -79,4 +79,4 @@ See the module index in the [root README](../README.md). Modules 02 onward reuse
+ 
+ ## Security notes
+ 
+-No tokens, customer IDs, tenant names, real IPs or hostnames are included. The `.gitignore` blocks common secret and tenant files. Keep it that way when adapting this project to a real environment.
++No tokens, customer IDs, tenant names, real IPs or hostnames are included. The `.gitignore` excludes common local secret and tenant files; it does not protect already tracked files. Keep it that way when adapting this project to a real environment.
+diff --git a/01-architecture/docs/02-data-flow.md b/01-architecture/docs/02-data-flow.md
+index de7ddce..21a731b 100644
+--- a/01-architecture/docs/02-data-flow.md
++++ b/01-architecture/docs/02-data-flow.md
+@@ -20,7 +20,7 @@ flowchart LR
+     STO[(Falcon LogScale<br/>repositories + views)]
+     ANA[Analyse<br/>CQL, Advanced event search,<br/>dashboards, lookup files]
+     DET[Detect<br/>first-party detections +<br/>correlation rules]
+-    RES[Respond<br/>Incident Workbench, Fusion SOAR,<br/>RTR containment]
++    RES[Respond<br/>Incident Workbench, Fusion SOAR,<br/>RTR investigation, host containment]
+ 
+     FP -- no connector, no parser --> STO
+     TP --> CON --> PRS
+@@ -42,7 +42,9 @@ A static copy of this diagram is in `diagrams/data-flow.svg`.
+ | Store | Events are written to repositories, each with its own retention. Views span repositories. | 6 third-party repositories (see `04-retention-and-repositories.md`) |
+ | Analyse | CQL in Advanced event search, dashboards, lookup files. | Single search surface via `view-soc-all` |
+ | Detect | First-party detections come from Falcon; correlation rules run CQL on a schedule against any data. | Correlation rules over third-party repositories |
+-| Respond | Incident Workbench for investigation, Fusion SOAR workflows, RTR/host containment, API clients with scopes. | Fusion workflow proposes host containment only after endpoint correlation and a confidence threshold, then waits for approval (ADR-009) |
++| Respond | Incident Workbench for investigation, Fusion SOAR workflows, RTR investigation and host containment, API clients with scopes. | Fusion workflow proposes host containment only after endpoint correlation and a confidence threshold, then waits for approval (ADR-009) |
++
++Host network containment is a Hosts API action, separate from Real Time Response (RTR) sessions and commands. Verify permissions for each independently; an RTR role does not establish containment authorization. Reference: [CrowdStrike Hosts API](https://developer.crowdstrike.com/api-reference/collections/hosts/).
+ 
+ ## Per-source ingest path
+ 
+diff --git a/README.md b/README.md
+index 01804f3..801ad11 100644
+--- a/README.md
++++ b/README.md
+@@ -4,14 +4,14 @@ A hands-on, documented build of CrowdStrike Falcon Next-Gen SIEM (NG-SIEM), from
+ 
+ ## The scenario: Northwind Labs
+ 
+-500 users, 300 endpoints, nine third-party log sources (Okta, Entra ID, Microsoft 365, AWS CloudTrail, FortiGate, Zscaler, Windows domain controllers, Linux servers), a small in-house SOC. Sources, repository names, tags, roles and retention are defined once in module 01 and reused by every later module.
++500 users, 300 endpoints, nine third-party log streams (FortiGate traffic and UTM/event are counted separately; Okta, Entra ID, Microsoft 365, AWS CloudTrail, FortiGate, Zscaler, Windows domain controllers, Linux servers), a small in-house SOC. Sources, repository names, tags, roles and retention are defined once in module 01 and reused by every later module.
+ 
+ ## Modules
+ 
+ | # | Module | Covers | Status |
+ |---|---|---|---|
+-| 01 | [Architecture](01-architecture) | Data flow, sizing, retention and repository design, RBAC design, naming and tagging, ADRs | Complete |
+-| 02 | [User management](02-user-management) | SSO, personas and roles, joiner/mover/leaver, API clients, break-glass accounts, access reviews and a reconciliation tool | Complete |
++| 01 | [Architecture](01-architecture) | Data flow, sizing, retention and repository design, RBAC design, naming and tagging, ADRs | Design documented; tenant validation pending |
++| 02 | [User management](02-user-management) | SSO, personas and roles, joiner/mover/leaver, API clients, break-glass accounts, access reviews and a reconciliation tool | Synthetic tests implemented; tenant validation pending |
+ | 03 | Data onboarding | HEC, data connectors, Falcon Log Collector, custom parsers, field validation | Planned |
+ | 04 | Collector fleet health | Collector deployment and versions, ingest health, silent-source alerting | Planned |
+ | 05 | Enrichment and threat intel | Lookup files, threat intel feeds, enrichment | Planned |
+@@ -20,6 +20,17 @@ A hands-on, documented build of CrowdStrike Falcon Next-Gen SIEM (NG-SIEM), from
+ | 08 | Cost and retention optimisation | Ingest filtering, tiering, licence headroom | Planned |
+ | 09 | Fusion SOAR workflows | Phishing triage, host containment, ticketing, chat alerts | Planned |
+ 
++## Evidence and next milestone
++
++Passing CI verifies the repository checks and synthetic fixtures. It does not prove a working tenant deployment, supported console permissions, or licensed retention. Each module must record its tenant validation evidence before being described as operationally complete.
++
++The next milestone is module 03: onboard one Linux lab source, show sanitized raw and parsed events, validate timestamps and required fields, and document delivery latency, restart behavior and troubleshooting. Then demonstrate one detection against those events before expanding to additional sources.
++
++## Backlog
++
++- Interactive sizing calculator: deferred. Keep the Excel workbook for now; future scope includes source selection, GB/day or EPS input, filtering, retention and growth, using a shared calculation specification.
++- Falcon EDR deployment and policy management: a separate project; this lab covers the endpoint integration needed for SIEM investigation and response.
++
+ ## How a module is laid out
+ 
+ ```text
+@@ -42,7 +53,7 @@ cd 01-architecture && pytest -q
+ 
+ ## Conventions
+ 
+-- All data is synthetic. No tokens, customer IDs, tenant names, real IPs or hostnames, enforced by tests and `.gitignore`.
++- Use synthetic data and sanitized evidence only. Gitleaks and repository tests detect selected sensitive patterns; `.gitignore` excludes common local secret files. These checks do not guarantee that every sensitive value is caught, and ignore rules do not protect already tracked files.
+ - Numbers in documents come from a workbook or config file and are checked against it by tests.
+ - Planning values (compression ratio, filter reduction, growth) are labelled ESTIMATE until replaced by measured telemetry. Permissions are labelled design intent until verified against the console.
+ - Anything that depends on licence, vendor limits or console behaviour is marked **VERIFY** until checked against current CrowdStrike documentation.
