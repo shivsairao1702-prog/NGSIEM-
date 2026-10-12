@@ -113,4 +113,4 @@ Each record states the context, the decision, the alternatives and the trade-off
 
 **Decision:** Use Fusion SOAR workflows for containment and notification. Automation runs through dedicated API clients with minimal scopes. Third-party SOAR actions and correlation rule templates may require a paid NG-SIEM licence, so confirm entitlement.
 
-**Trade-offs:** Workflows must be tested and version controlled (see `fusion-soar-workflows` and `ci-cd-for-security`).
+**Trade-offs:** Workflows must be tested and version controlled (see module 09 and the CI workflow in `.github/workflows/validate.yml`).

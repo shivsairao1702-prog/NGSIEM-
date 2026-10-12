@@ -1,77 +1,47 @@
-# ngsiem-architecture
+# CrowdStrike Falcon Next-Gen SIEM lab
 
-Reference architecture for a CrowdStrike Falcon Next-Gen SIEM (NG-SIEM) deployment: data flow, sizing, retention and repository design, role-based access control, naming and tagging, and the decisions behind them.
+A hands-on, documented build of CrowdStrike Falcon Next-Gen SIEM (NG-SIEM), from architecture through user management, data onboarding, detection content and automation. Every module is designed around one fictional organisation, so the modules fit together and no real tenant data appears anywhere.
 
-The design is built for a **fictional organisation, Northwind Labs** (500 users, 300 endpoints). Every number is a planning value, so no real tenant data appears anywhere in this project.
+## The scenario: Northwind Labs
 
-![NG-SIEM data flow](docs/diagrams/data-flow.png)
+500 users, 300 endpoints, nine third-party log sources (Okta, Entra ID, Microsoft 365, AWS CloudTrail, FortiGate, Zscaler, Windows domain controllers, Linux servers), a small in-house SOC. Sources, repository names, tags, roles and retention are defined once in module 01 and reused by every later module.
 
-## Goal
+## Modules
 
-Show how to design an NG-SIEM deployment before onboarding any data: where logs come from, how they are ingested, parsed and stored, how long they are kept, who can see and change what, and how the design is sized against licensing.
+| # | Module | Covers | Status |
+|---|---|---|---|
+| 01 | [Architecture](01-architecture) | Data flow, sizing, retention and repository design, RBAC design, naming and tagging, ADRs | Complete |
+| 02 | User management | Users, built-in and custom roles, SSO, API clients and scopes, access reviews | Planned |
+| 03 | Data onboarding | HEC, data connectors, Falcon Log Collector, custom parsers, field validation | Planned |
+| 04 | Collector fleet health | Collector deployment and versions, ingest health, silent-source alerting | Planned |
+| 05 | Enrichment and threat intel | Lookup files, threat intel feeds, enrichment | Planned |
+| 06 | Detections as code | CQL correlation rules, MITRE mapping, test data | Planned |
+| 07 | Dashboards and searches | Saved, scheduled and dashboard content | Planned |
+| 08 | Cost and retention optimisation | Ingest filtering, tiering, licence headroom | Planned |
+| 09 | Fusion SOAR workflows | Phishing triage, host containment, ticketing, chat alerts | Planned |
 
-## Design at a glance
+## How a module is laid out
 
-| Item | Design |
-|---|---|
-| Third-party sources | 9 (Okta, Entra ID, Microsoft 365, AWS CloudTrail, FortiGate x2, Zscaler, Windows DCs, Linux) |
-| Ingest methods | Data connectors, HEC, Falcon Log Collector, CrowdStream |
-| Average / peak EPS | 204 / 612 |
-| Ingest after filtering | 8.03 GB/day (raw 11.53, filtering saves 3.50) |
-| With 25% growth buffer | 10.03 GB/day, which is 0.03 GB/day above the 10 GB/day free tier in the study notes |
-| Repositories | 6, split only by retention and access |
-| Retention | 365 days (identity, SaaS, cloud), 180 days (OS, network security), 90 days (network traffic) |
-| Roles | Read-only analyst, analyst, administrator, Falcon administrator, plus a scoped API client for automation |
-
-## Contents
-
-| Path | What it covers |
-|---|---|
-| [`docs/01-overview-and-scope.md`](docs/01-overview-and-scope.md) | Environment, use cases, scope boundaries |
-| [`docs/02-data-flow.md`](docs/02-data-flow.md) | End-to-end flow, ingest path per source, time fields, no re-parsing constraint |
-| [`docs/03-sizing.md`](docs/03-sizing.md) | Sizing method, results, sensitivity, collector capacity |
-| [`docs/04-retention-and-repositories.md`](docs/04-retention-and-repositories.md) | Repository and view design, retention rationale, datasource limits |
-| [`docs/05-rbac.md`](docs/05-rbac.md) | Roles, personas, separation of duties |
-| [`docs/06-naming-and-tagging.md`](docs/06-naming-and-tagging.md) | Platform tag schema and project naming conventions |
-| [`docs/07-decisions-adr.md`](docs/07-decisions-adr.md) | Eight architecture decision records |
-| [`config/rbac-matrix.csv`](config/rbac-matrix.csv) | Capability-by-role permission matrix |
-| [`sample-data/sizing-calculator.xlsx`](sample-data/sizing-calculator.xlsx) | Formula-driven sizing workbook |
-| [`docs/diagrams/`](docs/diagrams) | Data flow diagram (SVG and PNG) |
-
-## Using the sizing calculator
-
-1. Open `sample-data/sizing-calculator.xlsx`.
-2. On **Assumptions**, review the yellow cells (compression, growth, peak multiplier, free tier).
-3. On **Sizing**, edit the blue cells for each source: EPS, event size, filter reduction, retention.
-4. Read the result on **Summary**. Everything recalculates from the inputs.
+```text
+NN-module-name/
+├── README.md       goal, design, steps, outcomes
+├── docs/           numbered documents and diagrams
+├── config/         configuration, parsers, rules, workflows
+├── sample-data/    synthetic logs and calculators
+└── tests/          checks that run in CI
+```
 
 ## Validation
 
-The workbook is the source of truth for every number in the docs. `tests/test_consistency.py` fails if a document drifts from it, if a repository is given two retention periods, if the RBAC matrix breaks a separation-of-duties rule, or if a secret-like value, broken link or unknown repository name appears.
+Each module with a `tests/` folder is tested automatically on every push by `.github/workflows/validate.yml`, together with Markdown lint, an offline link check and a render check of every Mermaid diagram. To run one module locally:
 
 ```bash
 pip install -r requirements-dev.txt
-pytest -q
+cd 01-architecture && pytest -q
 ```
 
-GitHub Actions (`.github/workflows/validate.yml`) runs the same suite on every push and pull request, plus Markdown lint, an offline link check and a render check of every Mermaid diagram. After editing the workbook, recalculate it before committing so cached values are present; the tests read those cached values.
+## Conventions
 
-## Verify before relying on this design
-
-Licensing, limits and role names vary by contract and change over time. Check these against current CrowdStrike documentation and your own licence:
-
-- [ ] Free third-party ingest allowance (10 GB/day) and its 7-day retention
-- [ ] Maximum retention for third-party data under your licence (the notes record 365 days as a generic LogScale ceiling)
-- [ ] Exact built-in NG-SIEM role names and permissions, including whether an "NG SIEM Security Lead" role exists
-- [ ] How repository and view level data access is configured in the NG-SIEM console
-- [ ] Current allowed values for `#observer.type`
-- [ ] CrowdStream availability under your licence
-- [ ] Names of the Falcon response roles used for RTR and containment
-
-## Related projects
-
-`ngsiem-data-onboarding` (next), `ngsiem-collector-fleet-health`, `ngsiem-detections-as-code`, `fusion-soar-workflows`.
-
-## Security notes
-
-No tokens, customer IDs, tenant names, real IPs or hostnames are included. The `.gitignore` blocks common secret and tenant files. Keep it that way when adapting this project to a real environment.
+- All data is synthetic. No tokens, customer IDs, tenant names, real IPs or hostnames, enforced by tests and `.gitignore`.
+- Numbers in documents come from a workbook or config file and are checked against it by tests.
+- Anything that depends on licence, vendor limits or console behaviour is marked **VERIFY** until checked against current CrowdStrike documentation.

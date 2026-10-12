@@ -1,6 +1,6 @@
 # 05 - Role-based access control
 
-The full permission matrix is in `../config/rbac-matrix.csv`. This document explains the reasoning.
+The full permission matrix is in `../config/rbac-matrix.csv`. This document explains the design reasoning. Day-to-day user administration (provisioning, SSO, API clients, access reviews) is module 02 (user management).
 
 ## Principles
 
@@ -27,7 +27,7 @@ The study notes also mention a possible "NG SIEM Security Lead" role from exam p
 |---|---|---|---|
 | SOC Analyst L1 | 4 | NG SIEM Analyst | Triage and investigate. No ingest or parser changes. |
 | SOC Analyst L2 / Incident responder | 2 | NG SIEM Analyst, plus a response role for RTR/containment | Containment role granted separately. **VERIFY** the exact Falcon response role names. |
-| Detection engineer | 2 | NG SIEM Analyst, plus rule-management permissions via a custom role if available | Builds and tunes correlation rules. Changes go through CI review (see `detection-engineering-lab`). |
+| Detection engineer | 2 | NG SIEM Analyst, plus rule-management permissions via a custom role if available | Builds and tunes correlation rules. Changes go through CI review (see module 06). |
 | Platform engineer | 2 | NG SIEM Administrator | Owns connectors, HEC tokens, parsers, repositories, retention. |
 | Auditor / compliance | 1 | NG SIEM Analyst - Read Only | Uses `view-audit` only. |
 | Falcon platform owner | 1 | Falcon Administrator | Break-glass and user management. Not used for daily work. |

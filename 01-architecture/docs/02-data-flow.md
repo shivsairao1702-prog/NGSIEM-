@@ -68,11 +68,11 @@ Every event carries built-in fields that the architecture relies on:
 | `@timestamp` | Event time, taken by the parser from the log itself |
 | `@ingesttimestamp` | When NG-SIEM received the event |
 
-If a parser does not set `@timestamp`, LogScale uses the ingest time. A large gap between `@timestamp` and `@ingesttimestamp` indicates delayed delivery (collector backlog or outage), a parser reading the wrong time zone, or a wrong clock on the source device. A gap of roughly zero on every event suggests the parser may not be setting `@timestamp` at all. This gap is the basis of the delivery-health checks in `ngsiem-collector-fleet-health`.
+If a parser does not set `@timestamp`, LogScale uses the ingest time. A large gap between `@timestamp` and `@ingesttimestamp` indicates delayed delivery (collector backlog or outage), a parser reading the wrong time zone, or a wrong clock on the source device. A gap of roughly zero on every event suggests the parser may not be setting `@timestamp` at all. This gap is the basis of the delivery-health checks in module 04 (collector fleet health).
 
 ## Important constraint: no re-parsing
 
-LogScale cannot re-parse data once it is stored. The only fix for incorrectly parsed old events is to re-ingest them from `@rawstring`. This is why parsers are validated against sample data before a source goes live (see `ngsiem-data-onboarding`).
+LogScale cannot re-parse data once it is stored. The only fix for incorrectly parsed old events is to re-ingest them from `@rawstring`. This is why parsers are validated against sample data before a source goes live (see module 03 (data onboarding)).
 
 ## How a search stays fast
 

@@ -236,6 +236,8 @@ def test_relative_markdown_links_resolve():
 
 
 def test_gitignore_blocks_secret_files():
-    ignore = read(ROOT / ".gitignore")
+    # In the monorepo the ignore file lives at the repository root.
+    path = next(p for p in (ROOT / ".gitignore", ROOT.parent / ".gitignore") if p.exists())
+    ignore = read(path)
     for needle in (".env", "*.pem", "*.key"):
         assert needle in ignore
