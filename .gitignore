@@ -18,3 +18,8 @@ Thumbs.db
 .vscode/
 .idea/
 ~$*.xlsx
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
