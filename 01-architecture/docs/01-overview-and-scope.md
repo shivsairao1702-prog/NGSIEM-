@@ -46,11 +46,11 @@ NG-SIEM is part of the Falcon platform, not a separate product. First-party data
 
 | Topic | Where it is covered |
 |---|---|
-| Step-by-step source onboarding and custom parsers | `ngsiem-data-onboarding` |
-| Collector deployment, health monitoring, silent-source alerting | `ngsiem-collector-fleet-health` |
-| Detection content (CQL rules, correlation rules) | `ngsiem-detections-as-code` |
-| Fusion SOAR workflow build-out | `fusion-soar-workflows` |
-| Falcon sensor deployment and host policies | `falcon-sensor-deployment`, `falcon-host-policies` |
+| Step-by-step source onboarding and custom parsers | module 03 (data onboarding) |
+| Collector deployment, health monitoring, silent-source alerting | module 04 (collector fleet health) |
+| Detection content (CQL rules, correlation rules) | module 06 (detections as code) |
+| Fusion SOAR workflow build-out | module 09 (Fusion SOAR workflows) |
+| Falcon sensor deployment and host policies | Not covered in this lab yet |
 
 ## Assumptions and verification status
 

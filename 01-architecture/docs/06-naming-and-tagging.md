@@ -75,4 +75,4 @@ Rule tactic codes in `NW-<TACTIC>-<NNN>` use short MITRE ATT&CK tactic abbreviat
 
 ## Multiple environments
 
-If a second tenant (for example a test tenant) is added, keep identical object names in both and distinguish by tenant, not by suffix. This keeps detections and dashboards portable between environments. Use the CI project in `detection-engineering-lab` to promote content from test to production.
+If a second tenant (for example a test tenant) is added, keep identical object names in both and distinguish by tenant, not by suffix. This keeps detections and dashboards portable between environments. Use the CI workflow at the repository root, extended in module 06, to promote content from test to production.

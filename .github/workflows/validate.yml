@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   consistency:
-    name: Docs, workbook and RBAC consistency
+    name: Module consistency tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +24,16 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-dev.txt
       - run: pip install -r requirements-dev.txt
-      - run: pytest -q
+      - name: Run the test suite of every module that has one
+        run: |
+          status=0
+          for tests in */tests; do
+            module="${tests%/tests}"
+            echo "::group::$module"
+            (cd "$module" && pytest -q) || status=1
+            echo "::endgroup::"
+          done
+          exit $status
 
   markdown:
     name: Markdown lint
@@ -35,7 +44,8 @@ jobs:
         with:
           globs: |
             README.md
-            docs/**/*.md
+            */README.md
+            */docs/**/*.md
 
   links:
     name: Link check
@@ -44,7 +54,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: lycheeverse/lychee-action@v2
         with:
-          args: --offline --no-progress "README.md" "docs/**/*.md"
+          args: --offline --no-progress "README.md" "*/README.md" "*/docs/**/*.md"
           fail: true
 
   diagrams:
@@ -58,11 +68,11 @@ jobs:
       - name: Render every Mermaid block (fails on syntax errors)
         run: |
           npm install --no-save @mermaid-js/mermaid-cli
+          echo '{"args":["--no-sandbox"]}' > /tmp/puppeteer.json
           mkdir -p /tmp/mermaid
-          export PUPPETEER_CONFIG=/tmp/puppeteer.json
-          echo '{"args":["--no-sandbox"]}' > "$PUPPETEER_CONFIG"
-          for f in README.md docs/*.md; do
+          for f in $(git ls-files '*.md'); do
             if grep -q '```mermaid' "$f"; then
-              npx mmdc -p "$PUPPETEER_CONFIG" -i "$f" -o "/tmp/mermaid/$(basename "$f" .md).md"
+              out="/tmp/mermaid/$(echo "$f" | tr '/' '_')"
+              npx mmdc -p /tmp/puppeteer.json -i "$f" -o "$out"
             fi
           done
