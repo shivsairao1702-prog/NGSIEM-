@@ -20,7 +20,7 @@ flowchart LR
     STO[(Falcon LogScale<br/>repositories + views)]
     ANA[Analyse<br/>CQL, Advanced event search,<br/>dashboards, lookup files]
     DET[Detect<br/>first-party detections +<br/>correlation rules]
-    RES[Respond<br/>Incident Workbench, Fusion SOAR,<br/>RTR containment]
+    RES[Respond<br/>Incident Workbench, Fusion SOAR,<br/>RTR investigation, host containment]
 
     FP -- no connector, no parser --> STO
     TP --> CON --> PRS
@@ -42,7 +42,9 @@ A static copy of this diagram is in `diagrams/data-flow.svg`.
 | Store | Events are written to repositories, each with its own retention. Views span repositories. | 6 third-party repositories (see `04-retention-and-repositories.md`) |
 | Analyse | CQL in Advanced event search, dashboards, lookup files. | Single search surface via `view-soc-all` |
 | Detect | First-party detections come from Falcon; correlation rules run CQL on a schedule against any data. | Correlation rules over third-party repositories |
-| Respond | Incident Workbench for investigation, Fusion SOAR workflows, RTR/host containment, API clients with scopes. | Fusion workflow proposes host containment only after endpoint correlation and a confidence threshold, then waits for approval (ADR-009) |
+| Respond | Incident Workbench for investigation, Fusion SOAR workflows, RTR investigation and host containment, API clients with scopes. | Fusion workflow proposes host containment only after endpoint correlation and a confidence threshold, then waits for approval (ADR-009) |
+
+Host network containment is a Hosts API action, separate from Real Time Response (RTR) sessions and commands. Verify permissions for each independently; an RTR role does not establish containment authorization. Reference: [CrowdStrike Hosts API](https://developer.crowdstrike.com/api-reference/collections/hosts/).
 
 ## Per-source ingest path
 
