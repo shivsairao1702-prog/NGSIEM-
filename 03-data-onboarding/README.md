@@ -10,7 +10,7 @@ Make onboarding repeatable and checkable. A source is not onboarded when events 
 
 | Source | Method | Status |
 |---|---|---|
-| Cribl Datagen syslog (synthetic, test only) | Cribl Stream Quick Connect to a Cribl data connector | Documented, parser 1.1.0 tested against a model; 1.0.0 validated in a lab tenant |
+| Cribl Datagen syslog (synthetic, test only) | Cribl Stream Quick Connect to a Cribl data connector | Documented, parser 1.1.1 tested against a model; 1.0.0 validated in a lab tenant |
 | Linux Audit | Falcon Log Collector | Next |
 | Windows Security | Falcon Log Collector | Next |
 | Okta | Data connector | Next |
@@ -46,7 +46,7 @@ pytest -q
 
 ## Verify before relying on this
 
-- [ ] Parser 1.1.0 run through the validation queries in a tenant. The CQL is not executed in CI.
+- [ ] Parser 1.1.1 run through the validation queries in a tenant. The CQL is not executed in CI.
 - [ ] Items in `verify_in_tenant` in the parser's metadata file
 - [ ] Cribl and console menu names for the versions you run
 - [ ] Whether persistent queueing is needed for real sources

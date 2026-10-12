@@ -38,13 +38,13 @@ flowchart LR
 | 10 | NG-SIEM console | Run the validation query from `04-validation-and-troubleshooting.md` over the past 15 minutes. | Rows with populated fields |
 | 11 | Cribl | When finished, disable the Datagen source. | No test events keep consuming ingest |
 
-Block (not drop) is chosen for backpressure so that an NG-SIEM outage pushes back on the source instead of discarding events. Dropping would be harmless for a test feed, but a runbook that will be copied for real sources should use the safe setting. **VERIFY** whether persistent queueing is also needed for your sources and volumes.
+Block is chosen for destination backpressure, but it is not a lossless-delivery guarantee. UDP sources cannot receive backpressure; finite buffers, queues and worker restarts can still cause loss. Dropping would be harmless for a test feed, but a runbook that will be copied for real sources should use the safe setting. **VERIFY** whether persistent queueing is also needed for your sources and volumes.
 
 ## Problems seen
 
 | Symptom | Cause | Action |
 |---|---|---|
-| Destination Test returns HTTP 400 | Test was run before Commit & Deploy, so the worker had no configuration to send with | Deploy first, then test |
+| Destination Test returns HTTP 400 | Observed before Commit & Deploy in this lab; HTTP 400 can also indicate invalid payload or configuration | Deploy first, then test |
 | Events arrive, ingestion looks healthy, `host.hostname` and `process.name` empty | The destination wraps each event in an envelope (`time`, `host`, `event`) and the parser ran its syslog regex against the whole JSON | Parser unwraps first. Check `@rawstring` of one event: if it starts with `{`, this is the cause |
 | Events on the 1st to 9th of the month have wrong or missing times | RFC3164 pads single-digit days with a second space and the timestamp format used plain `d` | Use `MMM [ ]d HH:mm:ss` |
 | Parse error on `process.pid` | The field is integer-typed and a string was assigned | Parse with `parseInt` after checking the value is numeric |

@@ -7,7 +7,7 @@ An access review catches drift every 30 to 90 days. Monitoring catches the chang
 | Source | Where it lands | Notes |
 |---|---|---|
 | Falcon platform audit activity (user, role and API client changes, sign-ins) | First-party data | **VERIFY** which of these events are available in NG-SIEM for your tenant and how they are named |
-| Okta system log (group membership, application assignment, MFA policy, admin actions) | `repo-identity` (module 01) | Already onboarded as SRC-01 |
+| Okta system log (group membership, application assignment, MFA policy, admin actions) | `repo-identity` (module 01) | Planned as SRC-01; delivery evidence pending |
 | Entra ID audit and sign-in logs | `repo-identity` | SRC-02 |
 | Vault audit log (secret reads and rotations) | Not onboarded | Needed to detect API client secret misuse. Add as a source if the vault supports it |
 
@@ -30,7 +30,7 @@ No event names or CQL are given here because they have not been verified against
 
 ## Rules for these detections
 
-- They run on **first-party and identity data**, which is always in the platform, so they do not depend on third-party ingest volume (module 01, sizing).
+- Falcon audit events depend on available first-party audit telemetry. Okta and Entra ID are third-party sources that require onboarding, consume ingest allowance and can experience delivery gaps. These rules depend on their availability; monitor source health.
 - Each detection names an owner persona and a response action. A detection without both is not finished.
 - Privileged identities and break-glass accounts are tagged in a lookup file (`lk_privileged_users.csv`, naming per module 01) so rules can raise severity by identity without hard-coding names.
 - Alerts about the SOC's own access go to the security lead as well as the SOC queue, because an analyst should not be the only reviewer of an alert about their own account.

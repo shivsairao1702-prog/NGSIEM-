@@ -119,7 +119,7 @@ Each record states the context, the decision, the alternatives and the trade-off
 
 ## ADR-009: Containment guardrails
 
-**Status:** Accepted (design; implemented and tested in module 09)
+**Status:** Accepted as design; implementation and testing pending in module 09
 
 **Context:** Identity and network alerts name a user or an IP address, not a managed host. Isolating the wrong machine, a domain controller or an executive's laptop on a weak signal causes an outage, and an attacker who can trigger an alert can try to trigger a containment. Containment must be deliberate.
 

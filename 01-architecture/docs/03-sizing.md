@@ -82,7 +82,7 @@ Today the design fits inside the 10 GB/day free tier with about 2 GB/day to spar
 
 ## Collector and HEC capacity
 
-Peak load is about 612 EPS across all sources, spread over several collectors and API connectors. This is low for any single collector. The design still uses **two Falcon Log Collector instances** for availability rather than for throughput, so a collector restart does not create a collection gap. Benchmark real collector throughput in your own environment; no vendor throughput figures are asserted here.
+Peak load is about 612 EPS across all sources, spread over several collectors and API connectors. This is low for any single collector. The design proposes **two Falcon Log Collector instances**, but this alone does not provide failover or prevent gaps. Module 04 must specify routing, transport, buffering, checkpoint ownership and duplicate handling per source. Test restart, destination outage and recovery before claiming availability. UDP senders cannot be backpressured. Benchmark real collector throughput in your own environment; no vendor throughput figures are asserted here.
 
 ## Retained storage by repository
 

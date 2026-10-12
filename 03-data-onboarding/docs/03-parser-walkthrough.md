@@ -1,6 +1,6 @@
 # 03 - Parser walkthrough: cribl-datagen-syslog
 
-File: `config/parsers/cribl-datagen-syslog.cql`, version 1.1.0. Version 1.0.0 is the one validated in the lab tenant; 1.1.0 is not yet run in a tenant (see "What is not proven").
+File: `config/parsers/cribl-datagen-syslog.cql`, version 1.1.1. Version 1.0.0 is the one validated in the lab tenant; 1.1.1 is not yet run in a tenant (see "What is not proven").
 
 ## Flow
 
@@ -49,7 +49,7 @@ flowchart TD
 
 | Limitation | Case that pins it | Consequence |
 |---|---|---|
-| No year in RFC3164 | `test_year_rollover_hazard_is_real` | If the platform assumes the ingest year, a 31 December line ingested on 1 January lands about a year in the future. Prefer an envelope epoch, or add a rule that corrects a time more than a day ahead of ingest |
+| No year in RFC3164 | `test_year_rollover_hazard_is_real` | The Python model assumes the ingest year and can place December records in the future. LogScale documents previous-year inference for dates more than eight days ahead; the model does not reproduce this. Do not treat this fixture as platform evidence |
 | Zone assumed UTC | none | Wrong by the sender's offset if it logs local time. Confirm the sender |
 | Tags with a colon, such as `pam_unix(sshd:auth)`, split wrongly | `known-limitation-pam-tag` | `process.name` becomes `pam_unix(sshd`. The Linux auth parser must handle this form |
 | RFC5424 not supported | `rfc5424-not-supported` | Flagged, falls back to ingest time |
@@ -71,8 +71,16 @@ The model checks this file's regex and logic. It does not run LogScale. These de
 
 - `parseTimestamp` with `format="seconds"` on a fractional epoch
 - The year assumed for a time with no year
-- `floor()` and arithmetic inside `:=` for the priority block (if it errors, delete the block; the rest is independent)
+- The documented `math:floor(field=..., as=...)` pipeline form is now used; verify field types and execution in the tenant
 - The `Vendor` and `observer.type` values against the current vendor and allowed lists
 - That the tag fields selected in the parser settings match `tag_fields`
 
-Run version 1.1.0 through the validation query before treating it as validated.
+Run version 1.1.1 through the validation query before treating it as validated.
+
+## Review references
+
+- [math:floor syntax](https://library.humio.com/crowdstrike-query-language/functions-math-floor.html)
+- [Timestamp year inference](https://library.humio.com/crowdstrike-query-language/functions-parsetimestamp.html)
+- [Published CPS versions](https://developer.crowdstrike.com/ngsiem/cps/versions/)
+
+The CPS marker now declares the published legacy 1.0.0 baseline rather than an unpublished 2.0.0 version. This is not certification: audit ECS 8.x mappings or explicitly migrate to the current standard before production use.
