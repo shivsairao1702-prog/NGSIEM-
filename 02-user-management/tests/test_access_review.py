@@ -286,3 +286,30 @@ def test_readme_quotes_the_real_planted_finding_counts(planted):
     errors = sum(f.severity == "error" for f in planted)
     warnings = len(planted) - errors
     assert f"{errors} errors and {warnings} warnings" in read_text(ROOT / "README.md")
+
+
+def test_duplicate_console_rows_cannot_hide_privilege(policy, users, clients):
+    console = ar.read_csv(ROOT / "sample-data" / "console-export-clean.csv")
+    subject = console[0]["user_id"]
+    console.insert(0, {"user_id": subject, "console_roles": "Falcon Administrator"})
+    findings = ar.run_review(policy, users, clients, console, AS_OF)
+    assert any(f.code == "C03" and f.subject == subject for f in findings)
+
+
+def test_future_review_and_test_dates_are_rejected(policy, users):
+    import copy
+    rows = copy.deepcopy(users)
+    rows[0]["last_access_review"] = "2099-01-01"
+    bg = next(u for u in rows if u["account_type"] == "break_glass")
+    bg["last_tested"] = "2099-01-01"
+    findings = ar.review_users(policy, rows, AS_OF)
+    assert any(f.code == "U05" and f.subject == rows[0]["user_id"] for f in findings)
+    assert any(f.code == "U08" and f.subject == bg["user_id"] for f in findings)
+
+
+def test_future_secret_rotation_is_rejected(policy, clients):
+    import copy
+    rows = copy.deepcopy(clients)
+    rows[0]["last_rotated"] = "2099-01-01"
+    findings = ar.review_clients(policy, rows, AS_OF)
+    assert any(f.code == "A03" and f.subject == rows[0]["client_id"] for f in findings)

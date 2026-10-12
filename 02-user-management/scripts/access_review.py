@@ -94,12 +94,12 @@ def review_users(policy, users, as_of):
             out.append(make("U04", uid, f"ended {end.isoformat()}"))
         limit = priv_cadence if (persona and persona["privileged"]) else cadence
         reviewed = parse_date(u["last_access_review"])
-        if reviewed is None or as_of - reviewed > timedelta(days=limit):
+        if reviewed is None or reviewed > as_of or as_of - reviewed > timedelta(days=limit):
             when = reviewed.isoformat() if reviewed else "never"
             out.append(make("U05", uid, f"last reviewed {when}, limit {limit} days"))
         if u["account_type"] == "break_glass":
             tested = parse_date(u["last_tested"])
-            if tested is None or as_of - tested > timedelta(days=test_cadence):
+            if tested is None or tested > as_of or as_of - tested > timedelta(days=test_cadence):
                 out.append(make("U08", uid, f"last tested {tested.isoformat() if tested else 'never'}"))
 
     counts = Counter(u["persona"] for u in active)
@@ -116,7 +116,12 @@ def review_console(policy, users, console):
     out = []
     personas = policy["personas"]
     register = {u["user_id"]: u for u in users}
-    console_by_id = {r["user_id"]: set(split(r["console_roles"])) for r in console}
+    console_by_id = {}
+    for row in console:
+        uid = row["user_id"]
+        if uid in console_by_id:
+            out.append(make("C03", uid, "duplicate console rows; export must contain one row per user"))
+        console_by_id.setdefault(uid, set()).update(split(row["console_roles"]))
 
     for uid, roles in console_by_id.items():
         u = register.get(uid)
@@ -153,7 +158,7 @@ def review_clients(policy, clients, as_of):
                 out.append(make("A02", cid, f"extra scopes {extra}"))
         rotated = parse_date(c["last_rotated"])
         days = int(c["rotation_days"] or api["rotation_days"])
-        if rotated is None or as_of - rotated > timedelta(days=min(days, api["rotation_days"])):
+        if rotated is None or rotated > as_of or as_of - rotated > timedelta(days=min(days, api["rotation_days"])):
             out.append(make("A03", cid, f"last rotated {rotated.isoformat() if rotated else 'never'}"))
         if c["scopes_verified"] != "yes":
             out.append(make("A04", cid))
