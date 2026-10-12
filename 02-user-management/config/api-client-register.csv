@@ -1,0 +1,5 @@
+client_id,integration,purpose,owner_persona,intended_scopes,scopes_verified,secret_storage_ref,created,rotation_days,last_rotated,status
+apic-fusion-containment,fusion-containment,Fusion workflow host containment after approval,platform_engineer,hosts:read;hosts:write,no,vault://northwind/ngsiem/apic-fusion-containment,2026-03-10,90,2026-09-01,active
+apic-fusion-ticketing,fusion-ticketing,Fusion workflow ticket creation from alerts,platform_engineer,alerts:read,no,vault://northwind/ngsiem/apic-fusion-ticketing,2026-03-10,90,2026-09-01,active
+apic-ci-rule-deploy,ci-rule-deploy,CI deployment of reviewed correlation rules,detection_engineer,correlation-rules:write,no,vault://northwind/ngsiem/apic-ci-rule-deploy,2026-05-18,90,2026-08-20,active
+apic-falconpy-inventory,falconpy-inventory,Scheduled host inventory export,platform_engineer,hosts:read,no,vault://northwind/ngsiem/apic-falconpy-inventory,2026-04-02,90,2026-09-10,active

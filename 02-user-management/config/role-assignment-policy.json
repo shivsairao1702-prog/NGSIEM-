@@ -1,0 +1,141 @@
+{
+  "policy_version": "1.0.0",
+  "status": "design intent - console role names and API scope names are placeholders until verified (see 01-architecture/docs/08-rbac-verification.md)",
+  "authentication": {
+    "sso_required_for_named_users": true,
+    "idp": "okta",
+    "mfa_enforced_at_idp": true,
+    "phishing_resistant_mfa_for_privileged": true,
+    "break_glass": {
+      "max_accounts": 2,
+      "test_cadence_days": 90,
+      "local_credentials": true
+    }
+  },
+  "lifecycle": {
+    "joiner_target_business_days": 2,
+    "mover_old_access_removed_with_new": true,
+    "leaver_disable_hours": 4
+  },
+  "review": {
+    "cadence_days": 90,
+    "privileged_cadence_days": 30
+  },
+  "privileged_capabilities": [
+    "manage_users_and_roles",
+    "manage_api_clients",
+    "manage_repositories_and_retention",
+    "manage_parsers",
+    "manage_data_connectors_and_hec_tokens",
+    "manage_log_collector_fleet",
+    "contain_host_rtr"
+  ],
+  "personas": {
+    "soc_l1": {
+      "matrix_role": "analyst_l1",
+      "headcount_planned": 4,
+      "max_holders": 8,
+      "privileged": false,
+      "approvers": [
+        "soc_manager"
+      ],
+      "console_roles": [
+        "NG SIEM Analyst"
+      ]
+    },
+    "soc_l2_ir": {
+      "matrix_role": "analyst_l2_ir",
+      "headcount_planned": 2,
+      "max_holders": 4,
+      "privileged": true,
+      "approvers": [
+        "soc_manager",
+        "security_lead"
+      ],
+      "console_roles": [
+        "NG SIEM Analyst",
+        "<response role - name unverified>"
+      ]
+    },
+    "detection_engineer": {
+      "matrix_role": "detection_engineer",
+      "headcount_planned": 2,
+      "max_holders": 4,
+      "privileged": false,
+      "approvers": [
+        "soc_manager"
+      ],
+      "console_roles": [
+        "NG SIEM Analyst"
+      ]
+    },
+    "platform_engineer": {
+      "matrix_role": "platform_engineer",
+      "headcount_planned": 2,
+      "max_holders": 3,
+      "privileged": true,
+      "approvers": [
+        "security_lead",
+        "ciso"
+      ],
+      "console_roles": [
+        "NG SIEM Administrator"
+      ]
+    },
+    "auditor": {
+      "matrix_role": "analyst_read_only",
+      "headcount_planned": 1,
+      "max_holders": 2,
+      "privileged": false,
+      "approvers": [
+        "compliance_lead"
+      ],
+      "console_roles": [
+        "NG SIEM Analyst - Read Only"
+      ]
+    },
+    "falcon_platform_owner": {
+      "matrix_role": "falcon_admin",
+      "headcount_planned": 1,
+      "max_holders": 2,
+      "privileged": true,
+      "approvers": [
+        "ciso"
+      ],
+      "console_roles": [
+        "Falcon Administrator"
+      ]
+    },
+    "break_glass": {
+      "matrix_role": "falcon_admin",
+      "headcount_planned": 2,
+      "max_holders": 2,
+      "privileged": true,
+      "approvers": [
+        "ciso"
+      ],
+      "console_roles": [
+        "Falcon Administrator"
+      ]
+    }
+  },
+  "api_clients": {
+    "rotation_days": 90,
+    "scope_names_are_placeholders": true,
+    "scope_allowlist": {
+      "fusion-containment": [
+        "hosts:read",
+        "hosts:write"
+      ],
+      "fusion-ticketing": [
+        "alerts:read"
+      ],
+      "ci-rule-deploy": [
+        "correlation-rules:write"
+      ],
+      "falconpy-inventory": [
+        "hosts:read"
+      ]
+    }
+  }
+}
