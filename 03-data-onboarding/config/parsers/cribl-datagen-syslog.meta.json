@@ -1,0 +1,18 @@
+{
+  "parser_name": "cribl-datagen-syslog",
+  "parser_version": "1.1.0",
+  "purpose": "Pipeline validation with synthetic data. Not a production parser.",
+  "source": "Cribl Stream Datagen syslog.log through the Falcon Cribl data connector",
+  "production_repositories_allowed": false,
+  "target": "Sandbox or lab tenant only. Never a repo-* repository from module 01.",
+  "tag_fields": ["Vendor", "event.module", "event.dataset", "observer.type", "event.kind", "ecs.version", "Cps.version"],
+  "untagged_note": "event.kind is set in the NORMALIZATION block, the others in STATIC METADATA. #event.outcome is not tagged because this parser never sets it.",
+  "verify_in_tenant": [
+    "Vendor value against the vendor list",
+    "observer.type value against the allowed list",
+    "parseTimestamp format=seconds with fractional epoch",
+    "Year assumed by parseTimestamp for MMM [ ]d HH:mm:ss",
+    "floor() and arithmetic in := for the priority block",
+    "Tag fields selected in the parser settings match tag_fields above"
+  ]
+}

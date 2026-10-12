@@ -1,0 +1,165 @@
+{
+  "description": "Synthetic inputs for cribl-datagen-syslog.cql with the fields the parser must produce. 'raw' is a string; 'envelope' is an object serialised the way Cribl wraps events. '$RAW' in an expectation means 'the whole input string'. No real hosts, addresses or users.",
+  "cases": [
+    {
+      "id": "plain-rfc3164",
+      "why": "Baseline: priority, timestamp, host, app, pid and message all present.",
+      "raw": "<13>Oct 12 20:18:00 web01 sshd[1234]: Accepted publickey for svc-backup from a trusted jump host",
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": {
+        "Vendor": "Cribl",
+        "event.module": "syslog",
+        "event.dataset": "syslog.generic",
+        "Vendor.priority": "13",
+        "host.name": "web01",
+        "host.hostname": "web01",
+        "process.name": "sshd",
+        "service.name": "sshd",
+        "process.pid": 1234,
+        "message": "Accepted publickey for svc-backup from a trusted jump host",
+        "@timestamp": "2026-10-12T20:18:00Z",
+        "event.original": "$RAW",
+        "log.syslog.priority": 13,
+        "log.syslog.facility.code": 1,
+        "log.syslog.severity.code": 5,
+        "event.severity": 5
+      },
+      "absent": ["error.message", "@error"]
+    },
+    {
+      "id": "padded-single-digit-day",
+      "why": "RFC3164 pads days 1-9 with a second space. The format MMM [ ]d must accept it.",
+      "raw": "<30>Sep  9 03:04:05 db02 cron[77]: job ran",
+      "ingest_time": "2026-09-09T03:04:10Z",
+      "expect": {
+        "Vendor.timestamp": "Sep  9 03:04:05",
+        "@timestamp": "2026-09-09T03:04:05Z",
+        "host.name": "db02",
+        "process.pid": 77,
+        "log.syslog.facility.code": 3,
+        "log.syslog.severity.code": 6
+      },
+      "absent": ["error.message", "@error"]
+    },
+    {
+      "id": "unpadded-single-digit-day",
+      "why": "Some senders do not pad. The same format must accept a single space.",
+      "raw": "<13>Oct 2 20:18:00 web01 app: x",
+      "ingest_time": "2026-10-02T20:18:05Z",
+      "expect": { "@timestamp": "2026-10-02T20:18:00Z", "process.name": "app" },
+      "absent": ["error.message", "@error", "process.pid"]
+    },
+    {
+      "id": "no-priority-no-pid",
+      "why": "Both the <PRI> and the [pid] are optional; their derived fields must be absent, not empty.",
+      "raw": "Oct 12 20:18:00 web01 kernel: link up",
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": { "process.name": "kernel", "message": "link up", "host.name": "web01" },
+      "absent": ["Vendor.priority", "Vendor.pid", "process.pid", "log.syslog.priority", "log.syslog.facility.code", "log.syslog.severity.code", "event.severity", "error.message"]
+    },
+    {
+      "id": "priority-zero",
+      "why": "Facility 0 and severity 0 are real values and must not be treated as missing.",
+      "raw": "<0>Oct 12 20:18:00 web01 app: x",
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": { "log.syslog.facility.code": 0, "log.syslog.severity.code": 0, "event.severity": 0 },
+      "absent": ["error.message"]
+    },
+    {
+      "id": "fqdn-uppercase-host",
+      "why": "host.name and host.hostname are lower-cased; the vendor field keeps the original.",
+      "raw": "<13>Oct 12 20:18:00 WEB01.Corp.Example app[1]: x",
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": { "Vendor.host": "WEB01.Corp.Example", "host.name": "web01.corp.example", "host.hostname": "web01.corp.example" },
+      "absent": ["error.message"]
+    },
+    {
+      "id": "non-numeric-pid",
+      "why": "process.pid is integer-typed: a non-numeric capture must not be assigned.",
+      "raw": "<13>Oct 12 20:18:00 web01 app[abc]: x",
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": { "Vendor.pid": "abc", "process.name": "app" },
+      "absent": ["process.pid", "error.message"]
+    },
+    {
+      "id": "wrapped-envelope",
+      "why": "Cribl envelope: fields come from the syslog line, the envelope host is kept apart, event.original is the line, the envelope event copy is dropped.",
+      "envelope": { "time": 1791836280, "host": "cribl-worker-01", "event": "<13>Oct 12 20:18:00 web01 sshd[1234]: ok" },
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": {
+        "@timestamp": "2026-10-12T20:18:00Z",
+        "host.name": "web01",
+        "Vendor.envelope.host": "cribl-worker-01",
+        "process.name": "sshd",
+        "process.pid": 1234,
+        "message": "ok",
+        "event.original": "<13>Oct 12 20:18:00 web01 sshd[1234]: ok"
+      },
+      "absent": ["Vendor.envelope.event", "error.message"]
+    },
+    {
+      "id": "wrapped-fractional-epoch",
+      "why": "Envelope epoch is often fractional. VERIFY in a tenant that format=seconds accepts the fraction; the model assumes it does.",
+      "envelope": { "time": 1791836280.25, "host": "cribl-worker-01", "event": "<13>Oct 12 20:18:00 web01 app[2]: x" },
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": { "@timestamp": "2026-10-12T20:18:00.250Z" },
+      "absent": ["error.message"]
+    },
+    {
+      "id": "wrapped-epoch-wins-over-line-time",
+      "why": "Design decision (docs/03): when an envelope epoch is present it is used, even if the line carries a different time.",
+      "envelope": { "time": 1791836280, "host": "cribl-worker-01", "event": "<13>Oct 12 19:00:00 web01 app[2]: x" },
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": { "@timestamp": "2026-10-12T20:18:00Z", "Vendor.timestamp": "Oct 12 19:00:00" },
+      "absent": ["error.message"]
+    },
+    {
+      "id": "wrapped-empty-event-uses-raw",
+      "why": "excludeEmpty drops an empty event, so coalesce must fall through to _raw.",
+      "envelope": { "time": 1791836280, "host": "cribl-worker-01", "event": "", "_raw": "<13>Oct 12 20:18:00 web01 app[2]: from raw" },
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": { "message": "from raw", "host.name": "web01", "event.original": "<13>Oct 12 20:18:00 web01 app[2]: from raw" },
+      "absent": ["error.message", "Vendor.envelope._raw"]
+    },
+    {
+      "id": "wrapped-no-match-no-stale-host",
+      "why": "Regression for the 1.0.0 defect: a wrapped line the regex rejects must not borrow the envelope host for host.name.",
+      "envelope": { "time": 1791836280, "host": "cribl-worker-01", "event": "this is not syslog" },
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": { "error.message": "syslog regex did not match", "Vendor.envelope.host": "cribl-worker-01", "@timestamp": "2026-10-12T20:18:00Z", "event.original": "this is not syslog" },
+      "absent": ["host.name", "host.hostname", "process.name", "message"]
+    },
+    {
+      "id": "wrapped-without-event",
+      "why": "Envelope with neither event nor _raw: event.original falls back to the whole record and the event is flagged.",
+      "envelope": { "time": 1791836280, "host": "cribl-worker-01" },
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": { "error.message": "syslog regex did not match", "event.original": "$RAW" },
+      "absent": ["host.name", "process.name"]
+    },
+    {
+      "id": "rfc5424-not-supported",
+      "why": "RFC5424 is out of scope. It must be flagged, not mis-parsed, and must fall back to ingest time.",
+      "raw": "<165>1 2026-10-12T20:18:00Z web01 app 1234 ID47 - msg",
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": { "error.message": "syslog regex did not match", "event.original": "$RAW" },
+      "absent": ["host.name", "process.name", "@timestamp"]
+    },
+    {
+      "id": "invalid-month-name",
+      "why": "Regex accepts any three letters; parseTimestamp rejects the month, which must surface as @error rather than a wrong time.",
+      "raw": "<13>Foo 12 20:18:00 web01 app[1]: x",
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": { "@error": true, "host.name": "web01" },
+      "absent": ["@timestamp"]
+    },
+    {
+      "id": "known-limitation-pam-tag",
+      "why": "KNOWN LIMITATION, pinned on purpose: a tag containing a colon splits wrongly. The Linux auth parser (next module step) must handle this. If you fix the regex, update this case and docs/03.",
+      "raw": "<13>Oct 12 20:18:00 web01 pam_unix(sshd:auth): authentication failure",
+      "ingest_time": "2026-10-12T20:18:05Z",
+      "expect": { "process.name": "pam_unix(sshd", "message": "auth): authentication failure" },
+      "absent": ["error.message"]
+    }
+  ]
+}

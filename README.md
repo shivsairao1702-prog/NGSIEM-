@@ -12,7 +12,7 @@ A hands-on, documented build of CrowdStrike Falcon Next-Gen SIEM (NG-SIEM), from
 |---|---|---|---|
 | 01 | [Architecture](01-architecture) | Data flow, sizing, retention and repository design, RBAC design, naming and tagging, ADRs | Complete |
 | 02 | [User management](02-user-management) | SSO, personas and roles, joiner/mover/leaver, API clients, break-glass accounts, access reviews and a reconciliation tool | Complete |
-| 03 | Data onboarding | HEC, data connectors, Falcon Log Collector, custom parsers, field validation | Planned |
+| 03 | [Data onboarding](03-data-onboarding) | Onboarding methods, Cribl Quick Connect runbook, custom parser with a tested reference model, validation queries | In progress (Datagen syslog done; Linux, Windows, Okta, CloudTrail next) |
 | 04 | Collector fleet health | Collector deployment and versions, ingest health, silent-source alerting | Planned |
 | 05 | Enrichment and threat intel | Lookup files, threat intel feeds, enrichment | Planned |
 | 06 | Detections as code | CQL correlation rules, MITRE mapping, test data | Planned |

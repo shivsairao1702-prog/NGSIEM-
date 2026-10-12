@@ -17,7 +17,7 @@ SENSITIVE = [
     (r"\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}", "JWT"),
 ]
 
-TEXT_SUFFIXES = {".md", ".csv", ".svg", ".yml", ".yaml", ".py", ".json", ".toml", ".txt", ".sh"}
+TEXT_SUFFIXES = {".cql", ".md", ".csv", ".svg", ".yml", ".yaml", ".py", ".json", ".toml", ".txt", ".sh"}
 SKIP_PARTS = {".git", "node_modules", "__pycache__", ".pytest_cache"}
 LINK = re.compile(r"\]\(([^)#\s]+)(?:#[^)]*)?\)")
 
