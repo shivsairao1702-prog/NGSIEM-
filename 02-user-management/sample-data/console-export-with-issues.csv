@@ -1,0 +1,18 @@
+user_id,console_roles
+nw-soc-l1-01,NG SIEM Administrator
+nw-soc-l1-02,NG SIEM Analyst
+nw-soc-l1-03,NG SIEM Analyst
+nw-soc-l1-04,NG SIEM Analyst
+nw-soc-l2-01,NG SIEM Analyst;<response role - name unverified>
+nw-soc-l2-02,NG SIEM Analyst;<response role - name unverified>
+nw-deteng-01,NG SIEM Analyst
+nw-platform-01,NG SIEM Administrator
+nw-platform-02,NG SIEM Administrator
+nw-fo-01,Falcon Administrator
+nw-bg-01,Falcon Administrator
+nw-bg-02,Falcon Administrator
+nw-intern-01,NG SIEM Analyst
+nw-fo-02,Falcon Administrator
+nw-fo-03,Falcon Administrator
+nw-shadow-01,NG SIEM Analyst
+nw-deteng-02,NG SIEM Analyst

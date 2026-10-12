@@ -1,0 +1,15 @@
+user_id,account_type,persona,matrix_role,sso_group,status,start_date,end_date,last_access_review,last_tested
+nw-soc-l1-01,named,soc_l1,analyst_l1,grp-ngsiem-soc-l1,active,2024-02-05,,2026-09-15,
+nw-soc-l1-02,named,soc_l1,analyst_l1,grp-ngsiem-soc-l1,active,2024-06-17,,2026-09-15,
+nw-soc-l1-03,named,soc_l1,analyst_l1,grp-ngsiem-soc-l1,active,2025-03-03,,2026-09-15,
+nw-soc-l1-04,named,soc_l1,analyst_l1,grp-ngsiem-soc-l1,active,2026-01-12,,2026-09-15,
+nw-soc-l2-01,named,soc_l2_ir,analyst_l2_ir,grp-ngsiem-soc-l2-ir,active,2023-09-11,,2026-10-01,
+nw-soc-l2-02,named,soc_l2_ir,analyst_l2_ir,grp-ngsiem-soc-l2-ir,active,2024-11-04,,2026-10-01,
+nw-deteng-01,named,detection_engineer,detection_engineer,grp-ngsiem-detection-engineer,active,2024-04-22,,2026-09-15,
+nw-deteng-02,named,detection_engineer,detection_engineer,grp-ngsiem-detection-engineer,active,2025-07-14,,2026-09-15,
+nw-platform-01,named,platform_engineer,platform_engineer,grp-ngsiem-platform-engineer,active,2023-05-15,,2026-10-01,
+nw-platform-02,named,platform_engineer,platform_engineer,grp-ngsiem-platform-engineer,active,2025-01-20,,2026-10-01,
+nw-audit-01,named,auditor,analyst_read_only,grp-ngsiem-auditor,active,2025-10-01,,2026-09-15,
+nw-fo-01,named,falcon_platform_owner,falcon_admin,grp-ngsiem-falcon-platform-owner,active,2023-03-01,,2026-10-01,
+nw-bg-01,break_glass,break_glass,falcon_admin,,active,2023-03-01,,2026-10-01,2026-09-20
+nw-bg-02,break_glass,break_glass,falcon_admin,,active,2023-03-01,,2026-10-01,2026-09-20
