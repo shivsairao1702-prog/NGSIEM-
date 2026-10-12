@@ -30,7 +30,7 @@ NG-SIEM is part of the Falcon platform, not a separate product. First-party data
 2. **Cloud control-plane monitoring**: suspicious AWS API activity from CloudTrail.
 3. **Network and web visibility**: correlating firewall and proxy activity with endpoint telemetry.
 4. **Windows and Linux authentication monitoring**: brute force, lateral movement indicators.
-5. **Automated response**: alert on third-party data, then contain the host through the Falcon sensor using Fusion SOAR.
+5. **Guarded response**: alert on third-party data, correlate it to a managed endpoint, and contain that host through the Falcon sensor using Fusion SOAR after approval (ADR-009).
 6. **Investigation**: one search surface across first-party and third-party data.
 
 ## In scope

@@ -5,6 +5,7 @@ These tests fail if a document drifts from the workbook, if a repository is give
 two retention periods, or if the RBAC matrix breaks a separation-of-duties rule.
 """
 import csv
+import json
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -202,28 +203,130 @@ def test_automation_client_has_minimal_scope(rbac):
     assert granted == allowed, f"API client over-privileged: {granted - allowed}"
 
 
+def test_every_capability_has_a_console_mapping_row(rbac):
+    mapping_path = ROOT / "config" / "rbac-console-mapping.csv"
+    with open(mapping_path, newline="", encoding="utf-8") as fh:
+        mapping = {r["capability"]: r for r in csv.DictReader(fh)}
+    assert set(mapping) == set(rbac), f"matrix and mapping differ: {set(mapping) ^ set(rbac)}"
+    for cap, row in mapping.items():
+        intended = {k for k, v in rbac[cap].items() if k != "capability" and v == "Y"}
+        assert set(filter(None, row["intended_roles"].split(";"))) == intended, f"{cap}: intended roles drifted"
+        assert row["verified"] in {"yes", "no"}
+        if row["verified"] == "yes":
+            for field in ("console_role_or_permission", "console_location", "verified_on", "verified_by"):
+                assert row[field].strip(), f"{cap} marked verified but {field} is empty"
+
+
+def test_rbac_docs_state_verification_status():
+    assert "design intent" in read(DOCS / "05-rbac.md").lower()
+    assert re.search(r"has \*{0,2}not\*{0,2} been verified", read(DOCS / "08-rbac-verification.md"))
+
+
+# ---------------------------------------------------------------- containment policy
+@pytest.fixture(scope="module")
+def policy():
+    return json.loads(read(ROOT / "config" / "containment-policy.json"))
+
+
+def test_containment_requires_endpoint_correlation(policy):
+    er = policy["entity_resolution"]
+    assert er["required"] is True
+    assert er["require_single_match"] is True
+    assert er["on_no_match_or_ambiguous"].startswith("do_not_contain")
+    assert len(er["methods_in_order"]) >= 2
+    assert 0 < er["max_time_skew_seconds"] <= 600
+
+
+def test_containment_requires_confidence_and_approval(policy):
+    assert policy["confidence"]["min_independent_signals"] >= 2
+    assert policy["confidence"]["min_severity"] in {"high", "critical"}
+    assert policy["approval"]["required_by_default"] is True
+    assert "do_not_contain" in policy["approval"]["on_timeout"]
+
+
+def test_automatic_containment_is_off_and_strictly_bounded(policy):
+    auto = policy["auto_containment"]
+    assert auto["enabled"] is False
+    cond = auto["allowed_only_when"]
+    assert cond["min_severity"] == "critical"
+    assert cond["min_independent_signals"] > policy["confidence"]["min_independent_signals"]
+    assert cond["not_vip_user"] is True and cond["not_excluded"] is True
+
+
+def test_critical_assets_are_never_contained(policy):
+    never = set(policy["exclusions"]["never_contain_asset_tags"])
+    assert {"domain-controller", "tier0-server"} <= never
+    assert policy["blast_radius"]["max_containments_per_hour"] <= 5
+    assert policy["audit"]["log_every_decision"] and policy["audit"]["include_non_actions"]
+    assert policy["rollback"]["auto_lift"] is False
+
+
+def test_policy_roles_exist_and_may_contain(policy, rbac):
+    allowed = roles_with(rbac, "contain_host_rtr")
+    assert policy["approval"]["approver_role"] in allowed
+    assert policy["rollback"]["lift_containment_role"] in allowed
+
+
+def test_adr_009_documents_every_guardrail():
+    adr = read(DOCS / "07-decisions-adr.md")
+    assert "## ADR-009" in adr
+    section = adr.split("## ADR-009", 1)[1].lower()
+    for phrase in ("endpoint identity correlation", "confidence threshold", "approval",
+                   "exclusions", "blast-radius", "audit and rollback", "config/containment-policy.json"):
+        assert phrase in section, f"ADR-009 does not mention {phrase!r}"
+
+
 # ---------------------------------------------------------------- hygiene
+# Second line of defence behind Gitleaks (see .github/workflows/validate.yml).
+# These patterns are scanned against every text file, including this one, and against
+# every string cell in the workbook.
 SENSITIVE = [
     (r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", "IPv4 address"),
     (r"\b[0-9a-fA-F]{32}-[0-9a-fA-F]{2}\b", "Falcon CID format"),
     (r"(?i)\b(bearer|api[_-]?key|client[_-]?secret)\s*[:=]\s*\S+", "credential assignment"),
     (r"AKIA[0-9A-Z]{16}", "AWS access key id"),
+    (r"-----BEGIN [A-Z ]*PRIVATE KEY-----", "private key block"),
+    (r"\bgh[pousr]_[A-Za-z0-9]{36,}\b", "GitHub token"),
+    (r"\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}", "JWT"),
 ]
 
 
 def text_files():
     for p in ROOT.rglob("*"):
-        if p.is_file() and p.suffix in {".md", ".csv", ".svg", ".yml", ".yaml", ".py", ".json"} and ".git" not in p.parts:
+        if p.is_file() and p.suffix in {".md", ".csv", ".svg", ".yml", ".yaml", ".py", ".json", ".toml", ".txt"} and ".git" not in p.parts:
             yield p
 
 
 def test_no_sensitive_values_committed():
     for path in text_files():
-        if path.name == "test_consistency.py":
-            continue
         content = read(path)
         for pattern, label in SENSITIVE:
             assert not re.search(pattern, content), f"{label} found in {path.relative_to(ROOT)}"
+
+
+def test_no_sensitive_values_in_workbook_cells(wb):
+    for ws in wb.worksheets:
+        for row in ws.iter_rows():
+            for cell in row:
+                if isinstance(cell.value, str):
+                    for pattern, label in SENSITIVE:
+                        assert not re.search(pattern, cell.value), f"{label} in {ws.title}!{cell.coordinate}"
+
+
+def test_scanner_patterns_actually_detect_what_they_claim():
+    # Samples are assembled at runtime so that this file never contains a literal
+    # that the scanner above would flag.
+    samples = {
+        "IPv4 address": ".".join(["10", "20", "30", "40"]),
+        "Falcon CID format": "0123456789abcdef" * 2 + "-1F",
+        "credential assignment": "client_" + "secret = abc123",
+        "AWS access key id": "AKIA" + "ABCDEFGHIJKLMNOP",
+        "private key block": "-----BEGIN RSA " + "PRIVATE KEY-----",
+        "GitHub token": "ghp_" + "a" * 36,
+        "JWT": "eyJhbGciOiJIUzI1NiJ9" + "." + "eyJzdWIiOiIxMjM0NTY3ODkwIn0",
+    }
+    for pattern, label in SENSITIVE:
+        assert re.search(pattern, samples[label]), f"pattern for {label} does not match its sample"
 
 
 def test_relative_markdown_links_resolve():

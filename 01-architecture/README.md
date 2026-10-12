@@ -17,10 +17,11 @@ Show how to design an NG-SIEM deployment before onboarding any data: where logs 
 | Third-party sources | 9 (Okta, Entra ID, Microsoft 365, AWS CloudTrail, FortiGate x2, Zscaler, Windows DCs, Linux) |
 | Ingest methods | Data connectors, HEC, Falcon Log Collector, CrowdStream |
 | Average / peak EPS | 204 / 612 |
-| Ingest after filtering | 8.03 GB/day (raw 11.53, filtering saves 3.50) |
-| With 25% growth buffer | 10.03 GB/day, which is 0.03 GB/day above the 10 GB/day free tier in the study notes |
+| Ingest after filtering (estimate) | 8.03 GB/day (raw 11.53, filtering saves 3.50) |
+| With 25% growth buffer (estimate) | 10.03 GB/day, which is 0.03 GB/day above the 10 GB/day free tier in the study notes |
 | Repositories | 6, split only by retention and access |
 | Retention | 365 days (identity, SaaS, cloud), 180 days (OS, network security), 90 days (network traffic) |
+| Containment | Endpoint correlation, 2+ independent signals, L2 approval, exclusions, rate limit (ADR-009) |
 | Roles | Read-only analyst, analyst, administrator, Falcon administrator, plus a scoped API client for automation |
 
 ## Contents
@@ -33,8 +34,11 @@ Show how to design an NG-SIEM deployment before onboarding any data: where logs 
 | [`docs/04-retention-and-repositories.md`](docs/04-retention-and-repositories.md) | Repository and view design, retention rationale, datasource limits |
 | [`docs/05-rbac.md`](docs/05-rbac.md) | Roles, personas, separation of duties |
 | [`docs/06-naming-and-tagging.md`](docs/06-naming-and-tagging.md) | Platform tag schema and project naming conventions |
-| [`docs/07-decisions-adr.md`](docs/07-decisions-adr.md) | Eight architecture decision records |
-| [`config/rbac-matrix.csv`](config/rbac-matrix.csv) | Capability-by-role permission matrix |
+| [`docs/07-decisions-adr.md`](docs/07-decisions-adr.md) | Nine architecture decision records, including containment guardrails |
+| [`docs/08-rbac-verification.md`](docs/08-rbac-verification.md) | RBAC verification procedure, riskiest assumptions and fallbacks |
+| [`config/rbac-matrix.csv`](config/rbac-matrix.csv) | Capability-by-role matrix (design intent, not yet verified) |
+| [`config/rbac-console-mapping.csv`](config/rbac-console-mapping.csv) | Worksheet for mapping each capability to a real console permission |
+| [`config/containment-policy.json`](config/containment-policy.json) | Machine-readable guardrails for automated host containment |
 | [`sample-data/sizing-calculator.xlsx`](sample-data/sizing-calculator.xlsx) | Formula-driven sizing workbook |
 | [`docs/diagrams/`](docs/diagrams) | Data flow diagram (SVG and PNG) |
 
@@ -62,7 +66,8 @@ Licensing, limits and role names vary by contract and change over time. Check th
 
 - [ ] Free third-party ingest allowance (10 GB/day) and its 7-day retention
 - [ ] Maximum retention for third-party data under your licence (the notes record 365 days as a generic LogScale ceiling)
-- [ ] Exact built-in NG-SIEM role names and permissions, including whether an "NG SIEM Security Lead" role exists
+- [ ] Exact built-in NG-SIEM role names and permissions, including whether an "NG SIEM Security Lead" role exists. Complete `config/rbac-console-mapping.csv` (procedure in `docs/08-rbac-verification.md`)
+- [ ] Compression ratio and filter reductions replaced by measured values (validation plan in `docs/03-sizing.md`)
 - [ ] How repository and view level data access is configured in the NG-SIEM console
 - [ ] Current allowed values for `#observer.type`
 - [ ] CrowdStream availability under your licence

@@ -17,12 +17,17 @@ Only **third-party** data is sized. First-party Falcon data is already in the pl
 
 | Parameter | Value | Status |
 |---|---|---|
-| Compression ratio (raw : stored) | 10 : 1 | Assumption. Measure from repository stats after onboarding. |
-| Growth buffer (12 months) | 25% | Assumption (new sources and organisational growth) |
-| Peak-to-average EPS multiplier | 3x | Assumption, used only for collector/HEC capacity |
+| Compression ratio (raw : stored) | 10 : 1 | **ESTIMATE.** Measure from repository statistics after onboarding. |
+| Growth buffer (12 months) | 25% | **ESTIMATE** (new sources and organisational growth) |
+| Peak-to-average EPS multiplier | 3x | **ESTIMATE**, used only for collector/HEC capacity |
+| Pre-ingest filter reduction: FortiGate traffic | 50% | **ESTIMATE.** Drives the largest single saving (about 2.4 GB/day). |
+| Pre-ingest filter reduction: Zscaler, Windows DCs | 25%, 30% | **ESTIMATE** |
+| Per-source EPS and average event size | see workbook | **ESTIMATE** (fictional planning values) |
 | Free third-party ingest | 10 GB/day | From study notes for Falcon Insight XDR customers. **VERIFY** against current licensing. |
 
-## Results
+## Results (estimates)
+
+Every figure below is derived from the estimates above. None has been validated against real telemetry yet; see the validation plan at the end of this document.
 
 | Metric | Value |
 |---|---|
@@ -92,3 +97,17 @@ Peak load is about 612 EPS across all sources, spread over several collectors an
 | **Total** | **8.027** | | **142.4** |
 
 Storage capacity itself is governed by licence on the platform, so stored GB is shown to understand the shape of retention cost, not to provision disks.
+
+## Validation plan
+
+The compression ratio, the filter reductions, EPS and event size are all estimates. They stay labelled as estimates in the workbook and in every document until each has been replaced by a measured value.
+
+| Estimate | How to measure | Measured over | Replace when |
+|---|---|---|---|
+| Compression ratio (10:1) | Raw ingested volume divided by stored size, per repository, from repository statistics in the console. **VERIFY** where NG-SIEM exposes these figures for your tenant. | At least 14 days after a source goes live | Always. Use per-repository ratios if they differ from each other by more than 30%. |
+| Filter reduction (FortiGate 50%, others) | Run the source unfiltered for 7 days and keep that baseline. Enable the filter, then compare: reduction = 1 - filtered volume / unfiltered volume. | 7 days before, 7 days after | The measured value differs from the estimate by more than 20% |
+| Average EPS and event size | Events per source per day, and ingested bytes divided by event count. Include a month-end or other busy day. | 14 days | Any source differs by more than 20% |
+| Peak multiplier (3x) | 95th percentile of events per minute divided by the average, per collector | 14 days | Measured peak exceeds the estimate |
+| Growth buffer (25%) | Month-on-month ingest change, plus the onboarding roadmap | Quarterly | At each quarterly review |
+
+Acceptance rule: when a measurement replaces an estimate, update the workbook input, change its status from ESTIMATE to MEASURED with the date, re-run `pytest`, and update ADR-007 if the licence headroom conclusion changes. Review at 14 days, 30 days, then quarterly.
