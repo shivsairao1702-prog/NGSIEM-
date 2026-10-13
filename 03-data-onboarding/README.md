@@ -24,6 +24,7 @@ Make onboarding repeatable and checkable. A source is not onboarded when events 
 | [`docs/02-cribl-quick-connect-runbook.md`](docs/02-cribl-quick-connect-runbook.md) | Cribl Datagen through Quick Connect into NG-SIEM, with problems met and how to keep evidence safely |
 | [`docs/03-parser-walkthrough.md`](docs/03-parser-walkthrough.md) | The syslog parser: flow, decisions, fixes since 1.0.0, limitations, what is not proven |
 | [`docs/04-validation-and-troubleshooting.md`](docs/04-validation-and-troubleshooting.md) | Validation queries and a symptom table |
+| [`kb/Cribl-QuickConnect-to-CrowdStrike-NG-SIEM-KB.pdf`](kb/Cribl-QuickConnect-to-CrowdStrike-NG-SIEM-KB.pdf) | Customer-facing knowledge base article (9 pages, 4 diagrams) built from the validated runbook and parser 1.0.0 |
 | [`config/parsers/cribl-datagen-syslog.cql`](config/parsers/cribl-datagen-syslog.cql) | The parser |
 | [`config/parsers/cribl-datagen-syslog.meta.json`](config/parsers/cribl-datagen-syslog.meta.json) | Tag fields, test-only flag, items to verify in a tenant |
 | [`sample-data/datagen-syslog-cases.json`](sample-data/datagen-syslog-cases.json) | 16 synthetic inputs with the fields each must produce |
